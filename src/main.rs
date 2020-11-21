@@ -1,3 +1,4 @@
+mod components;
 mod game;
 mod systems;
 
