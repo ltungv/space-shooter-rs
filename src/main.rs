@@ -3,20 +3,22 @@ use bevy::{
     prelude::*,
 };
 
+use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-const WINDOW_WIDTH: f32 = 600.0;
-const WINDOW_HEIGHT: f32 = 800.0;
+const WINDOW_WIDTH: f32 = 600.;
+const WINDOW_HEIGHT: f32 = 800.;
 
-const PLAYER_SPRITE_HEIGHT: f32 = 24.0;
-const PLAYER_SPEED: f32 = 500.0;
-const PLAYER_SPRITE_WIDTH: f32 = 16.0;
+const PLAYER_SPRITE_HEIGHT: f32 = 24.;
+const PLAYER_SPEED: f32 = 500.;
+const PLAYER_SPRITE_WIDTH: f32 = 16.;
 
 const STABILIZATION_DELAY: Duration = Duration::from_millis(100);
 const ANIMATION_INTERVAL: Duration = Duration::from_millis(200);
 
 fn main() {
     App::build()
+        .init_resource::<TextureAtlasHandles>()
         .add_resource(WindowDescriptor {
             title: "Space shooter!".to_string(),
             width: WINDOW_WIDTH as u32,
@@ -29,9 +31,13 @@ fn main() {
         .add_startup_system(setup.system())
         .add_system(player_direction.system())
         .add_system(player_movement.system())
-        .add_system(player_animation.system())
+        .add_system(player_state_transition.system())
+        .add_system(entities_animation.system())
         .run();
 }
+
+#[derive(Default)]
+struct TextureAtlasHandles(HashMap<String, Handle<TextureAtlas>>);
 
 #[derive(Debug, PartialEq, Default)]
 struct MoveDirection(Vec2);
@@ -41,6 +47,9 @@ struct MoveSpeed(f32);
 
 #[derive(Debug, Default)]
 struct Player;
+
+#[derive(Debug, Default)]
+struct Enemy;
 
 #[derive(Debug, PartialEq)]
 enum PlayerAnimationState {
@@ -84,7 +93,10 @@ impl PlayerAnimationState {
 }
 
 #[derive(Debug)]
-struct AnimationCycleTimer(Timer);
+struct Animatable {
+    sprite_cycle_delta: usize,
+    cycle_timer: Timer,
+}
 
 #[derive(Debug)]
 struct LastStateTransitionInstant(Instant);
@@ -112,9 +124,9 @@ fn player_movement(
         .translation
         .x()
         // update bound
-        .min((WINDOW_WIDTH - width) / 2.0)
+        .min((WINDOW_WIDTH - width) / 2.)
         // lower bound
-        .max(-(WINDOW_WIDTH - width) / 2.0);
+        .max(-(WINDOW_WIDTH - width) / 2.);
 
     // Y-axis movement
     *transform.translation.y_mut() += time.delta_seconds * move_direction.y() * move_speed;
@@ -122,9 +134,9 @@ fn player_movement(
         .translation
         .y()
         // upper bound
-        .min((WINDOW_HEIGHT - height) / 2.0)
+        .min((WINDOW_HEIGHT - height) / 2.)
         // lower bound
-        .max(-(WINDOW_HEIGHT - height) / 2.0);
+        .max(-(WINDOW_HEIGHT - height) / 2.);
 }
 
 fn player_direction(
@@ -132,47 +144,54 @@ fn player_direction(
     _player: &Player,
     mut move_direction: Mut<MoveDirection>,
 ) {
-    *move_direction.0.y_mut() = 0.0;
-    *move_direction.0.x_mut() = 0.0;
+    *move_direction.0.y_mut() = 0.;
+    *move_direction.0.x_mut() = 0.;
 
     if kb_input.pressed(KeyCode::Up) {
-        *move_direction.0.y_mut() += 1.0;
+        *move_direction.0.y_mut() += 1.;
     }
     if kb_input.pressed(KeyCode::Down) {
-        *move_direction.0.y_mut() -= 1.0;
+        *move_direction.0.y_mut() -= 1.;
     }
     if kb_input.pressed(KeyCode::Left) {
-        *move_direction.0.x_mut() -= 1.0;
+        *move_direction.0.x_mut() -= 1.;
     }
     if kb_input.pressed(KeyCode::Right) {
-        *move_direction.0.x_mut() += 1.0;
+        *move_direction.0.x_mut() += 1.;
     }
 }
 
 #[allow(clippy::too_many_arguments)]
-fn player_animation(
+fn entities_animation(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlas>>,
+    texture_atlas_handle: &Handle<TextureAtlas>,
+    mut sprite: Mut<TextureAtlasSprite>,
+    mut animatable: Mut<Animatable>,
+) {
+    animatable.cycle_timer.tick(time.delta_seconds);
+    if animatable.cycle_timer.finished {
+        let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+        sprite.index = ((sprite.index as usize + animatable.sprite_cycle_delta)
+            % texture_atlas.textures.len()) as u32;
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn player_state_transition(
+    time: Res<Time>,
     _player: &Player,
     MoveDirection(move_direction): &MoveDirection,
-    texture_atlas_handle: &Handle<TextureAtlas>,
     mut sprite: Mut<TextureAtlasSprite>,
     mut animation_state: Mut<PlayerAnimationState>,
     mut last_state_transition_instant: Mut<LastStateTransitionInstant>,
-    mut animation_cycle_timer: Mut<AnimationCycleTimer>,
 ) {
-    animation_cycle_timer.0.tick(time.delta_seconds);
-    if animation_cycle_timer.0.finished {
-        let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
-        sprite.index = ((sprite.index as usize + 5) % texture_atlas.textures.len()) as u32;
-    }
-
     if let Some(now) = time.instant {
         if now.duration_since(last_state_transition_instant.0) >= STABILIZATION_DELAY {
             let x_direction = move_direction.x();
-            let new_animation_state = if x_direction < 0.0 {
+            let new_animation_state = if x_direction < 0. {
                 animation_state.transition_left()
-            } else if x_direction > 0.0 {
+            } else if x_direction > 0. {
                 animation_state.transition_right()
             } else {
                 animation_state.transition_stable()
@@ -197,21 +216,51 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlas_handles: ResMut<TextureAtlasHandles>,
 ) {
-    let ship_texture_handle = asset_server.load("textures/ship.png");
-    let ship_texture_atlas = TextureAtlas::from_grid(
-        ship_texture_handle,
-        Vec2::new(PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT),
-        5,
-        2,
+    let texture_atlas_handles_map = &mut texture_atlas_handles.0;
+    texture_atlas_handles_map.insert(
+        "ship".to_string(),
+        texture_atlases.add(TextureAtlas::from_grid(
+            asset_server.load("spritesheets/ship.png"),
+            Vec2::new(16., 24.),
+            5,
+            2,
+        )),
     );
-    let ship_texture_atlas_handle = texture_atlases.add(ship_texture_atlas);
+    texture_atlas_handles_map.insert(
+        "enemy-big".to_string(),
+        texture_atlases.add(TextureAtlas::from_grid(
+            asset_server.load("spritesheets/enemy-big.png"),
+            Vec2::new(32., 32.),
+            2,
+            1,
+        )),
+    );
+    texture_atlas_handles_map.insert(
+        "enemy-medium".to_string(),
+        texture_atlases.add(TextureAtlas::from_grid(
+            asset_server.load("spritesheets/enemy-medium.png"),
+            Vec2::new(32., 16.),
+            2,
+            1,
+        )),
+    );
+    texture_atlas_handles_map.insert(
+        "enemy-small".to_string(),
+        texture_atlases.add(TextureAtlas::from_grid(
+            asset_server.load("spritesheets/enemy-small.png"),
+            Vec2::new(16., 16.),
+            2,
+            1,
+        )),
+    );
 
     commands
         .spawn(Camera2dComponents::default())
         .spawn(SpriteSheetComponents {
-            texture_atlas: ship_texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(4.0)),
+            texture_atlas: texture_atlas_handles_map.get("ship").unwrap().clone(),
+            transform: Transform::from_scale(Vec3::splat(4.)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -220,5 +269,55 @@ fn setup(
         .with(MoveDirection::default())
         .with(PlayerAnimationState::Stabilized)
         .with(LastStateTransitionInstant(Instant::now()))
-        .with(AnimationCycleTimer(Timer::new(ANIMATION_INTERVAL, true)));
+        .with(Animatable {
+            sprite_cycle_delta: 5,
+            cycle_timer: Timer::new(ANIMATION_INTERVAL, true),
+        })
+        .spawn(SpriteSheetComponents {
+            texture_atlas: texture_atlas_handles_map.get("enemy-big").unwrap().clone(),
+            transform: Transform {
+                scale: Vec3::splat(4.),
+                translation: Vec3::new(150., 0., 0.),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .with(Enemy)
+        .with(Animatable {
+            sprite_cycle_delta: 1,
+            cycle_timer: Timer::new(ANIMATION_INTERVAL, true),
+        })
+        .spawn(SpriteSheetComponents {
+            texture_atlas: texture_atlas_handles_map
+                .get("enemy-medium")
+                .unwrap()
+                .clone(),
+            transform: Transform {
+                scale: Vec3::splat(4.),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .with(Enemy)
+        .with(Animatable {
+            sprite_cycle_delta: 1,
+            cycle_timer: Timer::new(ANIMATION_INTERVAL, true),
+        })
+        .spawn(SpriteSheetComponents {
+            texture_atlas: texture_atlas_handles_map
+                .get("enemy-small")
+                .unwrap()
+                .clone(),
+            transform: Transform {
+                scale: Vec3::splat(4.),
+                translation: Vec3::new(-150., 0., 0.),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .with(Enemy)
+        .with(Animatable {
+            sprite_cycle_delta: 1,
+            cycle_timer: Timer::new(ANIMATION_INTERVAL, true),
+        });
 }
