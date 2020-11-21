@@ -3,15 +3,17 @@ use bevy::{
     prelude::*,
 };
 
-use std::time;
+use std::time::{Duration, Instant};
 
-const PLAYER_SPEED: f32 = 300.0;
-const PLAYER_SPRITE_WIDTH: f32 = 16.0;
+const WINDOW_WIDTH: f32 = 600.0;
+const WINDOW_HEIGHT: f32 = 800.0;
+
 const PLAYER_SPRITE_HEIGHT: f32 = 24.0;
-const STABILIZATION_DELAY: time::Duration = time::Duration::from_millis(150);
-const ANIMATION_INTERVAL: time::Duration = time::Duration::from_millis(200);
-const WINDOW_WIDTH: f32 = 480.0;
-const WINDOW_HEIGHT: f32 = 720.0;
+const PLAYER_SPEED: f32 = 500.0;
+const PLAYER_SPRITE_WIDTH: f32 = 16.0;
+
+const STABILIZATION_DELAY: Duration = Duration::from_millis(100);
+const ANIMATION_INTERVAL: Duration = Duration::from_millis(200);
 
 fn main() {
     App::build()
@@ -25,17 +27,20 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
+        .add_system(player_direction.system())
+        .add_system(player_movement.system())
         .add_system(player_animation.system())
-        .add_system(player_keyboard_input_control.system())
         .run();
 }
 
-#[derive(Default)]
-struct MoveDuration {
-    left: time::Duration,
-    right: time::Duration,
-    stabilizing: time::Duration,
-}
+#[derive(Debug, PartialEq, Default)]
+struct MoveDirection(Vec2);
+
+#[derive(Debug)]
+struct MoveSpeed(f32);
+
+#[derive(Debug, Default)]
+struct Player;
 
 #[derive(Debug, PartialEq)]
 enum PlayerAnimationState {
@@ -46,128 +51,142 @@ enum PlayerAnimationState {
     FullRight,
 }
 
-struct Player {
-    speed: f32,
-    animation_state: PlayerAnimationState,
+impl PlayerAnimationState {
+    fn transition_left(&self) -> Self {
+        match self {
+            Self::FullLeft => Self::FullLeft,
+            Self::HalfLeft => Self::FullLeft,
+            Self::Stabilized => Self::HalfLeft,
+            Self::HalfRight => Self::Stabilized,
+            Self::FullRight => Self::HalfRight,
+        }
+    }
+
+    fn transition_right(&self) -> Self {
+        match self {
+            Self::FullLeft => Self::HalfLeft,
+            Self::HalfLeft => Self::Stabilized,
+            Self::Stabilized => Self::HalfRight,
+            Self::HalfRight => Self::FullRight,
+            Self::FullRight => Self::FullRight,
+        }
+    }
+
+    fn transition_stable(&self) -> Self {
+        match self {
+            Self::FullLeft => Self::HalfLeft,
+            Self::HalfLeft => Self::Stabilized,
+            Self::Stabilized => Self::Stabilized,
+            Self::HalfRight => Self::Stabilized,
+            Self::FullRight => Self::HalfRight,
+        }
+    }
 }
 
-fn player_keyboard_input_control(
+#[derive(Debug)]
+struct AnimationCycleTimer(Timer);
+
+#[derive(Debug)]
+struct LastStateTransitionInstant(Instant);
+
+impl Default for LastStateTransitionInstant {
+    fn default() -> Self {
+        Self(Instant::now())
+    }
+}
+
+fn player_movement(
     time: Res<Time>,
-    kb_input: Res<Input<KeyCode>>,
-    mut player_transforms: Query<(&mut Player, &mut Transform, &mut MoveDuration)>,
+    _player: &Player,
+    MoveSpeed(move_speed): &MoveSpeed,
+    MoveDirection(move_direction): &MoveDirection,
+    mut transform: Mut<Transform>,
 ) {
-    // Get movement direction based on key presses
-    let mut y_direction = 0.0;
-    let mut x_direction = 0.0;
+    // Get size of the player's sprite on screen
+    let width = PLAYER_SPRITE_WIDTH * transform.scale.x();
+    let height = PLAYER_SPRITE_HEIGHT * transform.scale.y();
+
+    // X-axis movement
+    *transform.translation.x_mut() += time.delta_seconds * move_direction.x() * move_speed;
+    *transform.translation.x_mut() = transform
+        .translation
+        .x()
+        // update bound
+        .min((WINDOW_WIDTH - width) / 2.0)
+        // lower bound
+        .max(-(WINDOW_WIDTH - width) / 2.0);
+
+    // Y-axis movement
+    *transform.translation.y_mut() += time.delta_seconds * move_direction.y() * move_speed;
+    *transform.translation.y_mut() = transform
+        .translation
+        .y()
+        // upper bound
+        .min((WINDOW_HEIGHT - height) / 2.0)
+        // lower bound
+        .max(-(WINDOW_HEIGHT - height) / 2.0);
+}
+
+fn player_direction(
+    kb_input: Res<Input<KeyCode>>,
+    _player: &Player,
+    mut move_direction: Mut<MoveDirection>,
+) {
+    *move_direction.0.y_mut() = 0.0;
+    *move_direction.0.x_mut() = 0.0;
+
     if kb_input.pressed(KeyCode::Up) {
-        y_direction += 1.0;
+        *move_direction.0.y_mut() += 1.0;
     }
     if kb_input.pressed(KeyCode::Down) {
-        y_direction -= 1.0;
+        *move_direction.0.y_mut() -= 1.0;
     }
     if kb_input.pressed(KeyCode::Left) {
-        x_direction -= 1.0;
+        *move_direction.0.x_mut() -= 1.0;
     }
     if kb_input.pressed(KeyCode::Right) {
-        x_direction += 1.0;
-    }
-
-    for (mut player, mut player_transform, mut player_move_duration) in player_transforms.iter_mut()
-    {
-        // Change the player's animation state based on the movement
-        if x_direction < 0.0 {
-            player_move_duration.right = time::Duration::new(0, 0);
-            player_move_duration.stabilizing = Default::default();
-            if player_move_duration.left >= STABILIZATION_DELAY {
-                player.animation_state = PlayerAnimationState::FullLeft;
-            } else {
-                player.animation_state = PlayerAnimationState::HalfLeft;
-                player_move_duration.left += time.delta;
-            }
-        } else if x_direction > 0.0 {
-            player_move_duration.left = Default::default();
-            player_move_duration.stabilizing = Default::default();
-            if player_move_duration.right >= STABILIZATION_DELAY {
-                player.animation_state = PlayerAnimationState::FullRight;
-            } else {
-                player.animation_state = PlayerAnimationState::HalfRight;
-                player_move_duration.right += time.delta;
-            }
-        } else {
-            player_move_duration.left = Default::default();
-            player_move_duration.right = Default::default();
-            if player_move_duration.stabilizing >= STABILIZATION_DELAY {
-                player.animation_state = PlayerAnimationState::Stabilized;
-            } else {
-                if player.animation_state == PlayerAnimationState::FullRight {
-                    player.animation_state = PlayerAnimationState::HalfRight;
-                }
-                if player.animation_state == PlayerAnimationState::FullLeft {
-                    player.animation_state = PlayerAnimationState::HalfLeft;
-                }
-                player_move_duration.stabilizing += time.delta;
-            }
-        }
-
-        // Change the player's position state based on the movement
-        let player_width = PLAYER_SPRITE_WIDTH * player_transform.scale.x();
-        *player_transform.translation.x_mut() += time.delta_seconds * x_direction * player.speed;
-        *player_transform.translation.x_mut() = player_transform
-            .translation
-            .x()
-            // update bound
-            .min((WINDOW_WIDTH - player_width) / 2.0)
-            // lower bound
-            .max(-(WINDOW_WIDTH - player_width) / 2.0);
-        *player_transform.translation.y_mut() += time.delta_seconds * y_direction * player.speed;
-        *player_transform.translation.y_mut() = player_transform
-            .translation
-            .y()
-            // upper bound
-            .min((WINDOW_HEIGHT - player_height) / 2.0)
-            // lower bound
-            .max(-(WINDOW_HEIGHT - player_height) / 2.0);
+        *move_direction.0.x_mut() += 1.0;
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn player_animation(
+    time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlas>>,
-    mut query: Query<(
-        &Player,
-        &mut Timer,
-        &mut TextureAtlasSprite,
-        &Handle<TextureAtlas>,
-    )>,
+    _player: &Player,
+    MoveDirection(move_direction): &MoveDirection,
+    texture_atlas_handle: &Handle<TextureAtlas>,
+    mut sprite: Mut<TextureAtlasSprite>,
+    mut animation_state: Mut<PlayerAnimationState>,
+    mut last_state_transition_instant: Mut<LastStateTransitionInstant>,
+    mut animation_cycle_timer: Mut<AnimationCycleTimer>,
 ) {
-    for (player, timer, mut sprite, texture_atlas_handle) in query.iter_mut() {
-        if timer.finished {
-            let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
-            sprite.index = ((sprite.index as usize + 5) % texture_atlas.textures.len()) as u32;
-            match player.animation_state {
-                PlayerAnimationState::FullLeft => {
-                    if sprite.index != 0 && sprite.index != 5 {
-                        sprite.index = 0
-                    }
-                }
-                PlayerAnimationState::HalfLeft => {
-                    if sprite.index != 1 && sprite.index != 6 {
-                        sprite.index = 1
-                    }
-                }
-                PlayerAnimationState::Stabilized => {
-                    if sprite.index != 2 && sprite.index != 7 {
-                        sprite.index = 2
-                    }
-                }
-                PlayerAnimationState::HalfRight => {
-                    if sprite.index != 3 && sprite.index != 8 {
-                        sprite.index = 3
-                    }
-                }
-                PlayerAnimationState::FullRight => {
-                    if sprite.index != 4 && sprite.index != 9 {
-                        sprite.index = 4
-                    }
+    animation_cycle_timer.0.tick(time.delta_seconds);
+    if animation_cycle_timer.0.finished {
+        let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+        sprite.index = ((sprite.index as usize + 5) % texture_atlas.textures.len()) as u32;
+    }
+
+    if let Some(now) = time.instant {
+        if now.duration_since(last_state_transition_instant.0) >= STABILIZATION_DELAY {
+            let x_direction = move_direction.x();
+            let new_animation_state = if x_direction < 0.0 {
+                animation_state.transition_left()
+            } else if x_direction > 0.0 {
+                animation_state.transition_right()
+            } else {
+                animation_state.transition_stable()
+            };
+
+            if new_animation_state != *animation_state {
+                last_state_transition_instant.0 = now;
+                *animation_state = new_animation_state;
+                match *animation_state {
+                    PlayerAnimationState::FullLeft => sprite.index = 0,
+                    PlayerAnimationState::HalfLeft => sprite.index = 1,
+                    PlayerAnimationState::Stabilized => sprite.index = 2,
+                    PlayerAnimationState::HalfRight => sprite.index = 3,
+                    PlayerAnimationState::FullRight => sprite.index = 4,
                 }
             }
         }
@@ -193,12 +212,13 @@ fn setup(
         .spawn(SpriteSheetComponents {
             texture_atlas: ship_texture_atlas_handle,
             transform: Transform::from_scale(Vec3::splat(4.0)),
+            sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
-        .with(Player {
-            speed: PLAYER_SPEED,
-            animation_state: PlayerAnimationState::Stabilized,
-        })
-        .with(MoveDuration::default())
-        .with(Timer::new(ANIMATION_INTERVAL, true));
+        .with(Player)
+        .with(MoveSpeed(PLAYER_SPEED))
+        .with(MoveDirection::default())
+        .with(PlayerAnimationState::Stabilized)
+        .with(LastStateTransitionInstant(Instant::now()))
+        .with(AnimationCycleTimer(Timer::new(ANIMATION_INTERVAL, true)));
 }
