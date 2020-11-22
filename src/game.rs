@@ -4,13 +4,9 @@ use std::collections::HashMap;
 use crate::entity;
 use crate::system;
 
+/// A plugin that add and initialize all the entities and systems for running the game
 #[derive(Default)]
 pub struct Game;
-
-#[derive(Default)]
-pub struct GameState {
-    pub texture_atlas_handles: HashMap<String, Handle<TextureAtlas>>,
-}
 
 impl Plugin for Game {
     // this is where we set up our plugin
@@ -24,6 +20,13 @@ impl Plugin for Game {
     }
 }
 
+/// A structure for holding general game states that are shared across multiple systems
+#[derive(Default)]
+pub struct GameState {
+    pub texture_atlas_handles: HashMap<String, Handle<TextureAtlas>>,
+}
+
+/// Loads all the necessary assets and creates the initial entites for the game
 fn init_game(
     mut commands: Commands,
     mut game_state: ResMut<GameState>,
@@ -78,6 +81,7 @@ fn init_game(
             .expect("Could not get player's texture atlas handle")
             .clone(),
     );
+    // TODO: Remove enemy creation (this is only for testing puposes)
     entity::create_enemy(
         &mut commands,
         game_state

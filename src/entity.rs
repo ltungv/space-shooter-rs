@@ -4,6 +4,7 @@ use std::time::{Duration, Instant};
 
 use crate::component::{Animatable, Enemy, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
 
+/// Add a new entity to the world with all the needed components to represent a player
 pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {
     commands
         .spawn(SpriteSheetComponents {
@@ -25,6 +26,8 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
         });
 }
 
+// TODO: Enemy's position should be determined by the caller of the function
+/// Add a new entity to the world with all the needed components to represent an enemy
 pub fn create_enemy(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {
     commands
         .spawn(SpriteSheetComponents {
