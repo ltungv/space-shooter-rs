@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
 use crate::component::{Animatable, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
-use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 #[allow(clippy::too_many_arguments)]
 pub fn player_movement(
     time: Res<Time>,
+    window_description: Res<WindowDescriptor>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     _player: &Player,
     move_speed: &MoveSpeed,
@@ -14,12 +14,15 @@ pub fn player_movement(
     sprite: &TextureAtlasSprite,
     mut transform: Mut<Transform>,
 ) {
-    let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+    let window_width = window_description.width as f32;
+    let window_height = window_description.height as f32;
+    let texture_atlas = texture_atlases
+        .get(texture_atlas_handle)
+        .expect("Could not get player's texture atlas");
     let texture_rect = texture_atlas.textures[sprite.index as usize];
-
     // Get size of the player's sprite on screen
-    let width = texture_rect.width() * transform.scale.x();
-    let height = texture_rect.height() * transform.scale.y();
+    let player_width = texture_rect.width() * transform.scale.x();
+    let player_height = texture_rect.height() * transform.scale.y();
 
     // X-axis movement
     *transform.translation.x_mut() += time.delta_seconds * move_direction.0.x() * move_speed.0;
@@ -27,9 +30,9 @@ pub fn player_movement(
         .translation
         .x()
         // update bound
-        .min((WINDOW_WIDTH - width) / 2.)
+        .min((window_width - player_width) / 2.)
         // lower bound
-        .max(-(WINDOW_WIDTH - width) / 2.);
+        .max(-(window_width - player_width) / 2.);
 
     // Y-axis movement
     *transform.translation.y_mut() += time.delta_seconds * move_direction.0.y() * move_speed.0;
@@ -37,9 +40,9 @@ pub fn player_movement(
         .translation
         .y()
         // upper bound
-        .min((WINDOW_HEIGHT - height) / 2.)
+        .min((window_height - player_height) / 2.)
         // lower bound
-        .max(-(WINDOW_HEIGHT - height) / 2.);
+        .max(-(window_height - player_height) / 2.);
 }
 
 pub fn player_control(
@@ -125,7 +128,9 @@ pub fn entities_animation(
 ) {
     animatable.cycle_timer.tick(time.delta_seconds);
     if animatable.cycle_timer.finished {
-        let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+        let texture_atlas = texture_atlases
+            .get(texture_atlas_handle)
+            .expect("Could not get entity's texture atlas");
         sprite.index = ((sprite.index as usize + animatable.sprite_cycle_delta)
             % texture_atlas.textures.len()) as u32;
     }

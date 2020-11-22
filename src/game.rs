@@ -75,7 +75,7 @@ fn init_game(
         game_state
             .texture_atlas_handles
             .get("ship")
-            .unwrap()
+            .expect("Could not get player's texture atlas handle")
             .clone(),
     );
     entity::create_enemy(
@@ -83,7 +83,7 @@ fn init_game(
         game_state
             .texture_atlas_handles
             .get("big-enemy")
-            .unwrap()
+            .expect("Could not get enemy's texture atlas handle")
             .clone(),
     );
 }
