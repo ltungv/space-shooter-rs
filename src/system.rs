@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::component::{Animatable, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
+use crate::component::{Animatable, Motion2D, Player, PlayerAnimationState};
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
@@ -12,8 +12,7 @@ pub fn player_movement(
     texture_atlases: Res<Assets<TextureAtlas>>,
     // Player
     _player: &Player,
-    move_speed: &MoveSpeed,
-    move_direction: &MoveDirection,
+    motion2d: &Motion2D,
     // SpriteSheetComponents
     sprite: &TextureAtlasSprite,
     texture_atlas_handle: &Handle<TextureAtlas>,
@@ -34,7 +33,7 @@ pub fn player_movement(
     let player_height = texture_rect.height() * transform.scale.y();
 
     // X-axis movement
-    *transform.translation.x_mut() += time.delta_seconds * move_direction.0.x() * move_speed.0;
+    *transform.translation.x_mut() += time.delta_seconds * motion2d.velocity.x();
     *transform.translation.x_mut() = transform
         .translation
         .x()
@@ -44,7 +43,7 @@ pub fn player_movement(
         .max(-(window_width - player_width) / 2.);
 
     // Y-axis movement
-    *transform.translation.y_mut() += time.delta_seconds * move_direction.0.y() * move_speed.0;
+    *transform.translation.y_mut() += time.delta_seconds * motion2d.velocity.y();
     *transform.translation.y_mut() = transform
         .translation
         .y()
@@ -58,22 +57,30 @@ pub fn player_movement(
 pub fn player_control(
     kb_input: Res<Input<KeyCode>>,
     _player: &Player,
-    mut move_direction: Mut<MoveDirection>,
+    mut motion2d: Mut<Motion2D>,
 ) {
-    *move_direction.0.y_mut() = 0.;
-    *move_direction.0.x_mut() = 0.;
-
+    let mut x_direction = 0.;
+    let mut y_direction = 0.;
     if kb_input.pressed(KeyCode::Up) {
-        *move_direction.0.y_mut() += 1.;
+        y_direction += 1.;
     }
     if kb_input.pressed(KeyCode::Down) {
-        *move_direction.0.y_mut() -= 1.;
+        y_direction -= 1.;
     }
     if kb_input.pressed(KeyCode::Left) {
-        *move_direction.0.x_mut() -= 1.;
+        x_direction -= 1.;
     }
     if kb_input.pressed(KeyCode::Right) {
-        *move_direction.0.x_mut() += 1.;
+        x_direction += 1.;
+    }
+
+    // without this, player moves faster diaonally
+    if x_direction != 0. && y_direction != 0. {
+        *motion2d.velocity.y_mut() = (motion2d.max_speed / f32::sqrt(2.)) * y_direction;
+        *motion2d.velocity.x_mut() = (motion2d.max_speed / f32::sqrt(2.)) * x_direction;
+    } else {
+        *motion2d.velocity.y_mut() = motion2d.max_speed * y_direction;
+        *motion2d.velocity.x_mut() = motion2d.max_speed * x_direction;
     }
 }
 
@@ -83,15 +90,15 @@ pub fn player_control(
 pub fn player_state_transition(
     time: Res<Time>,
     mut player: Mut<Player>,
-    move_direction: &MoveDirection,
+    motion2d: &Motion2D,
     mut sprite: Mut<TextureAtlasSprite>,
 ) {
     // State is not changed rapidly so that animation can be perceived by the player
     if let Some(now) = time.instant {
         if now.duration_since(player.transition_instant) >= player.transition_duration {
             // Determines the new state based on previous state and current moving direction
-            let x_direction = move_direction.0.x();
-            let new_animation_state = if x_direction < 0. {
+            let x_velocity = motion2d.velocity.x();
+            let new_animation_state = if x_velocity < 0. {
                 match player.animation_state {
                     PlayerAnimationState::Stabilized => PlayerAnimationState::HalfLeft,
                     PlayerAnimationState::HalfRight => PlayerAnimationState::Stabilized,
@@ -100,7 +107,7 @@ pub fn player_state_transition(
                         PlayerAnimationState::FullLeft
                     }
                 }
-            } else if x_direction > 0. {
+            } else if x_velocity > 0. {
                 match player.animation_state {
                     PlayerAnimationState::Stabilized => PlayerAnimationState::HalfRight,
                     PlayerAnimationState::HalfLeft => PlayerAnimationState::Stabilized,
@@ -143,6 +150,8 @@ pub fn entities_animation(
     mut sprite: Mut<TextureAtlasSprite>,
     mut animatable: Mut<Animatable>,
 ) {
+    // TODO: Use sprite count stored in the component,
+    // so we do not have to refer to the texture atlas
     animatable.cycle_timer.tick(time.delta_seconds);
     if animatable.cycle_timer.finished {
         let texture_atlas = texture_atlases

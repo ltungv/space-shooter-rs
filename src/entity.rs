@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use std::time::{Duration, Instant};
 
-use crate::component::{Animatable, Enemy, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
+use crate::component::{Animatable, Enemy, Motion2D, Player, PlayerAnimationState};
 
 /// Add a new entity to the world with all the needed components to represent a player
 pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {
@@ -18,17 +18,19 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
             transition_instant: Instant::now(),
             transition_duration: Duration::from_millis(100),
         })
-        .with(MoveSpeed(500.))
-        .with(MoveDirection::default())
+        .with(Motion2D {
+            max_speed: 500.,
+            ..Default::default()
+        })
         .with(Animatable {
             sprite_cycle_delta: 5,
             cycle_timer: Timer::new(Duration::from_millis(200), true),
         });
 }
 
-// TODO: Enemy's position should be determined by the caller of the function
 /// Add a new entity to the world with all the needed components to represent an enemy
 pub fn create_enemy(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {
+    // TODO: Enemy's position should be determined by the caller of the function
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,

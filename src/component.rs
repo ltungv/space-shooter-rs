@@ -24,20 +24,19 @@ pub enum PlayerAnimationState {
     FullRight,
 }
 
-// TODO: Maybe new component: Velocity = MoveDirection + MoveSpeed
-
-/// Component that determines an entity's moving direction along the x-axis and y-axis
+/// Component that determines how entities move within the 2D space
 #[derive(Debug, PartialEq, Default)]
-pub struct MoveDirection(pub Vec2);
-
-/// Component that determines the moving speed of an entity
-#[derive(Debug)]
-pub struct MoveSpeed(pub f32);
+pub struct Motion2D {
+    // TODO: movement on different axis can have different speed
+    pub max_speed: f32,
+    pub velocity: Vec2,
+}
 
 /// Component that determines when to change the sprite and which sprite index to change to when
 /// doing simple animation
 #[derive(Debug)]
 pub struct Animatable {
+    // TODO: Add sprite count
     pub sprite_cycle_delta: usize,
     pub cycle_timer: Timer,
 }
