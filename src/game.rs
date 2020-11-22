@@ -38,15 +38,6 @@ fn initialize_entities(mut commands: Commands, game_state: Res<GameState>) {
             .expect("Could not get player's texture atlas handle")
             .clone(),
     );
-    // TODO: Remove enemy creation (this is only for testing puposes)
-    entity::create_enemy(
-        &mut commands,
-        game_state
-            .texture_atlas_handles
-            .get("big-enemy")
-            .expect("Could not get enemy's texture atlas handle")
-            .clone(),
-    );
 }
 
 // TODO: Correct size and position of sprites for some sprite sheets
