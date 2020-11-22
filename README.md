@@ -8,7 +8,7 @@ This is me trying to design and implement a complete game using the Entity-Compo
 
 ## Todos
 
-Still thinking about the core mechanics and what interesting twist can be added to the game.
+Still thinking about the core mechanics and other interesting twists that can be added to the game.
 
 - [x] player ship controls
 - [ ] player ship health and damage
