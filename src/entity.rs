@@ -1,8 +1,9 @@
-use bevy::prelude::*;
-
-use std::time::{Duration, Instant};
-
 use crate::component::{Animatable, Enemy, Motion2D, Player, PlayerAnimationState};
+use bevy::prelude::{
+    Commands, Handle, SpriteSheetComponents, TextureAtlas, TextureAtlasSprite, Timer, Transform,
+    Vec3,
+};
+use std::time::{Duration, Instant};
 
 /// Add a new entity to the world with all the needed components to represent a player
 pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {

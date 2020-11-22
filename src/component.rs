@@ -1,5 +1,4 @@
-use bevy::core::Timer;
-use bevy::math::Vec2;
+use bevy::prelude::{Timer, Vec2};
 use std::time::{Duration, Instant};
 
 /// Component that marks an entity to be an enemy in the game

@@ -1,16 +1,18 @@
 mod component;
+mod constant;
 mod entity;
 mod game;
 mod system;
 
-use bevy::prelude::*;
+use bevy::prelude::{App, DefaultPlugins, WindowDescriptor};
+use constant::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 fn main() {
     App::build()
         .add_resource(WindowDescriptor {
             title: "Space shooter!".to_string(),
-            width: 600,
-            height: 800,
+            width: WINDOW_WIDTH as u32,
+            height: WINDOW_HEIGHT as u32,
             resizable: false,
             vsync: true,
             ..Default::default()

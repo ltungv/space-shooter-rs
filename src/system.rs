@@ -1,6 +1,11 @@
-use bevy::prelude::*;
-
 use crate::component::{Animatable, Motion2D, Player, PlayerAnimationState};
+use bevy::{
+    input::{keyboard::KeyCode, Input},
+    prelude::{
+        Assets, Handle, Mut, Res, TextureAtlas, TextureAtlasSprite, Time, Transform,
+        WindowDescriptor,
+    },
+};
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area

@@ -1,8 +1,9 @@
-use bevy::prelude::*;
+use crate::{entity, system};
+use bevy::prelude::{
+    AppBuilder, AssetServer, Assets, Camera2dComponents, Commands, Handle, IntoForEachSystem,
+    IntoQuerySystem, Plugin, Res, ResMut, TextureAtlas, Vec2,
+};
 use std::collections::HashMap;
-
-use crate::entity;
-use crate::system;
 
 /// A plugin that add and initialize all the entities and systems for running the game
 #[derive(Default)]
