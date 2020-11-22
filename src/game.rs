@@ -81,9 +81,9 @@ fn init_game(
             ..Default::default()
         })
         .with(components::Player {
-            stabilization_duration: STABILIZATION_DURATION,
             animation_state: components::PlayerAnimationState::Stabilized,
-            last_transition_instant: Instant::now(),
+            transition_instant: Instant::now(),
+            transition_duration: STABILIZATION_DURATION,
         })
         .with(components::MoveSpeed(PLAYER_SPEED))
         .with(components::MoveDirection::default())

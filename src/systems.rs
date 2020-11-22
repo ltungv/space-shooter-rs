@@ -1,14 +1,15 @@
-use crate::components;
-use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use bevy::prelude::*;
+
+use crate::components::{Animatable, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
+use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 #[allow(clippy::too_many_arguments)]
 pub fn player_movement(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlas>>,
-    _player: &components::Player,
-    move_speed: &components::MoveSpeed,
-    move_direction: &components::MoveDirection,
+    _player: &Player,
+    move_speed: &MoveSpeed,
+    move_direction: &MoveDirection,
     texture_atlas_handle: &Handle<TextureAtlas>,
     sprite: &TextureAtlasSprite,
     mut transform: Mut<Transform>,
@@ -43,8 +44,8 @@ pub fn player_movement(
 
 pub fn player_control(
     kb_input: Res<Input<KeyCode>>,
-    _player: &components::Player,
-    mut move_direction: Mut<components::MoveDirection>,
+    _player: &Player,
+    mut move_direction: Mut<MoveDirection>,
 ) {
     *move_direction.0.y_mut() = 0.;
     *move_direction.0.x_mut() = 0.;
@@ -65,31 +66,51 @@ pub fn player_control(
 
 pub fn player_state_transition(
     time: Res<Time>,
-    mut player: Mut<components::Player>,
-    move_direction: &components::MoveDirection,
+    mut player: Mut<Player>,
+    move_direction: &MoveDirection,
     mut sprite: Mut<TextureAtlasSprite>,
 ) {
     if let Some(now) = time.instant {
-        if now.duration_since(player.last_transition_instant) >= player.stabilization_duration {
+        if now.duration_since(player.transition_instant) >= player.transition_duration {
             let x_direction = move_direction.0.x();
             let new_animation_state = if x_direction < 0. {
-                player.animation_state.transition_left()
+                match player.animation_state {
+                    PlayerAnimationState::FullLeft | PlayerAnimationState::HalfLeft => {
+                        PlayerAnimationState::FullLeft
+                    }
+                    PlayerAnimationState::Stabilized => PlayerAnimationState::HalfLeft,
+                    PlayerAnimationState::HalfRight => PlayerAnimationState::Stabilized,
+                    PlayerAnimationState::FullRight => PlayerAnimationState::HalfRight,
+                }
             } else if x_direction > 0. {
-                player.animation_state.transition_right()
+                match player.animation_state {
+                    PlayerAnimationState::FullLeft => PlayerAnimationState::HalfLeft,
+                    PlayerAnimationState::HalfLeft => PlayerAnimationState::Stabilized,
+                    PlayerAnimationState::Stabilized => PlayerAnimationState::HalfRight,
+                    PlayerAnimationState::HalfRight | PlayerAnimationState::FullRight => {
+                        PlayerAnimationState::FullRight
+                    }
+                }
             } else {
-                player.animation_state.transition_stable()
+                match player.animation_state {
+                    PlayerAnimationState::FullLeft => PlayerAnimationState::HalfLeft,
+                    PlayerAnimationState::Stabilized
+                    | PlayerAnimationState::HalfRight
+                    | PlayerAnimationState::HalfLeft => PlayerAnimationState::Stabilized,
+                    PlayerAnimationState::FullRight => PlayerAnimationState::HalfRight,
+                }
             };
 
             if new_animation_state != player.animation_state {
-                player.last_transition_instant = now;
+                player.transition_instant = now;
                 player.animation_state = new_animation_state;
-                match player.animation_state {
-                    components::PlayerAnimationState::FullLeft => sprite.index = 0,
-                    components::PlayerAnimationState::HalfLeft => sprite.index = 1,
-                    components::PlayerAnimationState::Stabilized => sprite.index = 2,
-                    components::PlayerAnimationState::HalfRight => sprite.index = 3,
-                    components::PlayerAnimationState::FullRight => sprite.index = 4,
-                }
+                sprite.index = match player.animation_state {
+                    PlayerAnimationState::FullLeft => 0,
+                    PlayerAnimationState::HalfLeft => 1,
+                    PlayerAnimationState::Stabilized => 2,
+                    PlayerAnimationState::HalfRight => 3,
+                    PlayerAnimationState::FullRight => 4,
+                };
             }
         }
     }
@@ -100,7 +121,7 @@ pub fn entities_animation(
     texture_atlases: Res<Assets<TextureAtlas>>,
     texture_atlas_handle: &Handle<TextureAtlas>,
     mut sprite: Mut<TextureAtlasSprite>,
-    mut animatable: Mut<components::Animatable>,
+    mut animatable: Mut<Animatable>,
 ) {
     animatable.cycle_timer.tick(time.delta_seconds);
     if animatable.cycle_timer.finished {
