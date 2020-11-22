@@ -23,7 +23,8 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
             ..Default::default()
         })
         .with(Animatable {
-            sprite_cycle_delta: 5,
+            sprite_idx_delta: 5,
+            sprite_count: 10,
             cycle_timer: Timer::new(Duration::from_millis(200), true),
         });
 }
@@ -43,7 +44,8 @@ pub fn create_enemy(commands: &mut Commands, texture_atlas_handle: Handle<Textur
         })
         .with(Enemy)
         .with(Animatable {
-            sprite_cycle_delta: 1,
+            sprite_idx_delta: 1,
+            sprite_count: 2,
             cycle_timer: Timer::new(Duration::from_millis(200), true),
         });
 }

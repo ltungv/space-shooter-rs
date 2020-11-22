@@ -145,19 +145,11 @@ pub fn player_state_transition(
 /// Periodically change the index to the sprite in the spritesheet
 pub fn entities_animation(
     time: Res<Time>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
-    texture_atlas_handle: &Handle<TextureAtlas>,
     mut sprite: Mut<TextureAtlasSprite>,
     mut animatable: Mut<Animatable>,
 ) {
-    // TODO: Use sprite count stored in the component,
-    // so we do not have to refer to the texture atlas
     animatable.cycle_timer.tick(time.delta_seconds);
     if animatable.cycle_timer.finished {
-        let texture_atlas = texture_atlases
-            .get(texture_atlas_handle)
-            .expect("Could not get entity's texture atlas");
-        sprite.index = ((sprite.index as usize + animatable.sprite_cycle_delta)
-            % texture_atlas.textures.len()) as u32;
+        sprite.index = (sprite.index + animatable.sprite_idx_delta) % animatable.sprite_count;
     }
 }

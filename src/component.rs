@@ -36,7 +36,7 @@ pub struct Motion2D {
 /// doing simple animation
 #[derive(Debug)]
 pub struct Animatable {
-    // TODO: Add sprite count
-    pub sprite_cycle_delta: usize,
+    pub sprite_idx_delta: u32,
+    pub sprite_count: u32,
     pub cycle_timer: Timer,
 }
