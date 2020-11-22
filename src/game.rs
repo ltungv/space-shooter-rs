@@ -1,14 +1,8 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
-use std::time::{Duration, Instant};
-
-use crate::components;
-use crate::systems;
-
-const PLAYER_SPEED: f32 = 500.;
-const STABILIZATION_DURATION: Duration = Duration::from_millis(100);
-const ANIMATION_INTERVAL: Duration = Duration::from_millis(200);
+use crate::entity;
+use crate::system;
 
 #[derive(Default)]
 pub struct Game;
@@ -23,10 +17,10 @@ impl Plugin for Game {
     fn build(&self, app: &mut AppBuilder) {
         app.init_resource::<GameState>()
             .add_startup_system(init_game.system())
-            .add_system(systems::player_control.system())
-            .add_system(systems::player_movement.system())
-            .add_system(systems::player_state_transition.system())
-            .add_system(systems::entities_animation.system());
+            .add_system(system::player_control.system())
+            .add_system(system::player_movement.system())
+            .add_system(system::player_state_transition.system())
+            .add_system(system::entities_animation.system());
     }
 }
 
@@ -37,6 +31,15 @@ fn init_game(
     asset_server: Res<AssetServer>,
 ) {
     // Loading spritesheets into texture atlases
+    game_state.texture_atlas_handles.insert(
+        "ship".to_string(),
+        texture_atlases.add(TextureAtlas::from_grid(
+            asset_server.load("spritesheets/ship.png"),
+            Vec2::new(16., 24.),
+            5,
+            2,
+        )),
+    );
     game_state.texture_atlas_handles.insert(
         "enemy-big".to_string(),
         texture_atlases.add(TextureAtlas::from_grid(
@@ -66,47 +69,21 @@ fn init_game(
     );
 
     // Create initial entities
-    commands
-        // CAMERA
-        .spawn(Camera2dComponents::default())
-        // PLAYER
-        .spawn(SpriteSheetComponents {
-            texture_atlas: game_state
-                .texture_atlas_handles
-                .get("ship")
-                .unwrap()
-                .clone(),
-            transform: Transform::from_scale(Vec3::splat(4.)),
-            sprite: TextureAtlasSprite::new(2),
-            ..Default::default()
-        })
-        .with(components::Player {
-            animation_state: components::PlayerAnimationState::Stabilized,
-            transition_instant: Instant::now(),
-            transition_duration: STABILIZATION_DURATION,
-        })
-        .with(components::MoveSpeed(PLAYER_SPEED))
-        .with(components::MoveDirection::default())
-        .with(components::Animatable {
-            sprite_cycle_delta: 5,
-            cycle_timer: Timer::new(ANIMATION_INTERVAL, true),
-        })
-        .spawn(SpriteSheetComponents {
-            texture_atlas: game_state
-                .texture_atlas_handles
-                .get("enemy-big")
-                .unwrap()
-                .clone(),
-            transform: Transform {
-                scale: Vec3::splat(4.),
-                translation: Vec3::new(150., 0., 0.),
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .with(components::Enemy)
-        .with(components::Animatable {
-            sprite_cycle_delta: 1,
-            cycle_timer: Timer::new(ANIMATION_INTERVAL, true),
-        });
+    commands.spawn(Camera2dComponents::default());
+    entity::create_player(
+        &mut commands,
+        game_state
+            .texture_atlas_handles
+            .get("ship")
+            .unwrap()
+            .clone(),
+    );
+    entity::create_enemy(
+        &mut commands,
+        game_state
+            .texture_atlas_handles
+            .get("big-enemy")
+            .unwrap()
+            .clone(),
+    );
 }

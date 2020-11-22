@@ -1,6 +1,7 @@
-mod components;
+mod component;
+mod entity;
 mod game;
-mod systems;
+mod system;
 
 use bevy::prelude::*;
 

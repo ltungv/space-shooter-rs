@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::components::{Animatable, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
+use crate::component::{Animatable, MoveDirection, MoveSpeed, Player, PlayerAnimationState};
 use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 #[allow(clippy::too_many_arguments)]
