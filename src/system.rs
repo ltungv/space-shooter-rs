@@ -9,7 +9,7 @@ use crate::{
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
-    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform, Vec2, Vec3},
+    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform, Vec3},
 };
 use rand::prelude::*;
 
@@ -52,14 +52,14 @@ pub fn enemies_spawner(
 ) {
     spawner.spawn_timer.tick(time.delta_seconds);
     if spawner.spawn_timer.just_finished {
-        // let max_width = ARENA_MAX_X - ARENA_SPAWN_OFFSET;
-        // let min_width = ARENA_MIN_X + ARENA_SPAWN_OFFSET;
-        // ARENA_MIN_X + ARENA_SPAWN_OFFSET + thread_rng().gen::<f32>() * (max_width - min_width)
-
         let max_offset_x_from_center =
             ARENA_WIDTH - ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR;
         let min_width = -(max_offset_x_from_center) / 2.;
         let max_width = (max_offset_x_from_center) / 2.;
+
+        let translation_x = min_width + rand::thread_rng().gen::<f32>() * (max_width - min_width);
+        let translation_y =
+            (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.;
 
         entity::create_enemy(
             &mut commands,
@@ -68,13 +68,7 @@ pub fn enemies_spawner(
                 .get("enemy-big")
                 .expect("Could not get small enemy's texture atlas handle")
                 .clone(),
-            100.,
-            Vec2::new(0.0, -100.),
-            Vec3::new(
-                min_width + rand::thread_rng().gen::<f32>() * (max_width - min_width),
-                (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.,
-                0.,
-            ),
+            Vec3::new(translation_x, translation_y, 0.),
         );
     }
 }

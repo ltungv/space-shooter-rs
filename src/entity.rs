@@ -44,8 +44,6 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
 pub fn create_enemy(
     commands: &mut Commands,
     texture_atlas_handle: Handle<TextureAtlas>,
-    max_speed: f32,
-    velocity: Vec2,
     translation: Vec3,
 ) {
     commands
@@ -53,7 +51,7 @@ pub fn create_enemy(
             texture_atlas: texture_atlas_handle,
             transform: Transform {
                 translation,
-                scale: Vec3::splat(4.0),
+                scale: Vec3::splat(SPRITE_UNIFORM_SCALING_FACTOR),
                 ..Default::default()
             },
             ..Default::default()
@@ -64,8 +62,8 @@ pub fn create_enemy(
             height: ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
         })
         .with(Motion {
-            max_speed,
-            velocity,
+            max_speed: 100.0,
+            velocity: Vec2::new(0.0, -80),
         })
         .with(Animatable {
             sprite_idx_delta: 1,
