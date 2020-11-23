@@ -1,7 +1,15 @@
-use crate::component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState};
+use crate::{
+    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState},
+    constant::{
+        ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
+        ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
+        ENEMY_SMALL_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
+        SPRITE_UNIFORM_SCALING_FACTOR,
+    },
+};
 use bevy::prelude::{
     Commands, Handle, SpriteSheetComponents, TextureAtlas, TextureAtlasSprite, Timer, Transform,
-    Vec3,
+    Vec2, Vec3,
 };
 use std::time::{Duration, Instant};
 
@@ -10,7 +18,7 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(4.0)),
+            transform: Transform::from_scale(Vec3::splat(SPRITE_UNIFORM_SCALING_FACTOR)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -19,13 +27,13 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
             transition_instant: Instant::now(),
             transition_duration: Duration::from_millis(100),
         })
-        .with(Motion{
+        .with(HitBox {
+            width: PLAYER_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
+            height: PLAYER_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR,
+        })
+        .with(Motion {
             max_speed: 500.,
             ..Default::default()
-        })
-        .with(HitBox {
-            width: 16. * 4.,
-            height: 24. * 4.,
         })
         .with(Animatable {
             sprite_idx_delta: 5,
@@ -35,18 +43,30 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
 }
 
 /// Add a new entity to the world with all the needed components to represent an enemy
-pub fn create_enemy(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {
-    // TODO: Enemy's position should be determined by the caller of the function
+pub fn create_enemy(
+    commands: &mut Commands,
+    texture_atlas_handle: Handle<TextureAtlas>,
+    translation: Vec3,
+) {
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
             transform: Transform {
-                translation: Vec3::new(150., 0., 0.),
+                translation,
+                scale: Vec3::splat(4.0),
                 ..Default::default()
             },
             ..Default::default()
         })
         .with(Enemy)
+        .with(HitBox {
+            width: ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
+            height: ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
+        })
+        .with(Motion {
+            max_speed: 50.,
+            velocity: Vec2::new(0., -50.),
+        })
         .with(Animatable {
             sprite_idx_delta: 1,
             sprite_count: 2,

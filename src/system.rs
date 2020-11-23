@@ -1,11 +1,25 @@
 use crate::{
-    component::{Animatable, HitBox, Motion, Player, PlayerAnimationState},
-    constant::{WINDOW_HEIGHT, WINDOW_WIDTH},
+    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState},
+    constant::{ARENA_HEIGHT, ARENA_WIDTH},
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
     prelude::{Mut, Res, TextureAtlasSprite, Time, Transform},
 };
+
+/// Change player's position based on the moving speed and moving direction. Movement is limited
+/// to the window viewable area
+#[allow(clippy::too_many_arguments)]
+pub fn enemies_movement(
+    // Resources
+    time: Res<Time>,
+    _enemy: &Enemy,
+    motion: &Motion,
+    mut transform: Mut<Transform>,
+) {
+    *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
+    *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
+}
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
@@ -19,7 +33,7 @@ pub fn player_movement(
     mut transform: Mut<Transform>,
 ) {
     // X-axis movement
-    let player_width_offset = (WINDOW_WIDTH - hit_box.width) / 2.;
+    let player_width_offset = (ARENA_WIDTH - hit_box.width) / 2.;
     *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
     *transform.translation.x_mut() = transform
         .translation
@@ -30,7 +44,7 @@ pub fn player_movement(
         .max(-player_width_offset);
 
     // Y-axis movement
-    let player_height_offset = (WINDOW_HEIGHT - hit_box.height) / 2.;
+    let player_height_offset = (ARENA_HEIGHT - hit_box.height) / 2.;
     *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
     *transform.translation.y_mut() = transform
         .translation

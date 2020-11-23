@@ -1,4 +1,11 @@
-use crate::{entity, system};
+use crate::{
+    constant::{
+        ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
+        ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
+        ENEMY_SMALL_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
+    },
+    entity, system,
+};
 use bevy::prelude::{
     AppBuilder, AssetServer, Assets, Camera2dComponents, Commands, Handle, IntoForEachSystem,
     IntoQuerySystem, Plugin, Res, ResMut, TextureAtlas, Vec2,
@@ -18,6 +25,7 @@ impl Plugin for Game {
             .add_system(system::player_control.system())
             .add_system(system::player_movement.system())
             .add_system(system::player_state_transition.system())
+            .add_system(system::enemies_movement.system())
             .add_system(system::entities_animation.system());
     }
 }
@@ -53,7 +61,7 @@ fn load_spritesheets(
         "ship".to_string(),
         texture_atlases.add(TextureAtlas::from_grid(
             asset_server.load("spritesheets/ship.png"),
-            Vec2::new(16., 24.),
+            Vec2::new(PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT),
             5,
             2,
         )),
@@ -62,7 +70,7 @@ fn load_spritesheets(
         "enemy-big".to_string(),
         texture_atlases.add(TextureAtlas::from_grid(
             asset_server.load("spritesheets/enemy-big.png"),
-            Vec2::new(32., 32.),
+            Vec2::new(ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT),
             2,
             1,
         )),
@@ -71,7 +79,7 @@ fn load_spritesheets(
         "enemy-medium".to_string(),
         texture_atlases.add(TextureAtlas::from_grid(
             asset_server.load("spritesheets/enemy-medium.png"),
-            Vec2::new(32., 16.),
+            Vec2::new(ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT),
             2,
             1,
         )),
@@ -80,7 +88,7 @@ fn load_spritesheets(
         "enemy-small".to_string(),
         texture_atlases.add(TextureAtlas::from_grid(
             asset_server.load("spritesheets/enemy-small.png"),
-            Vec2::new(16., 16.),
+            Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
             2,
             1,
         )),
