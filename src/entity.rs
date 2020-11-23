@@ -1,9 +1,7 @@
 use crate::{
     component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState},
     constant::{
-        ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
-        ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
-        ENEMY_SMALL_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
+        ENEMY_BIG_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
         SPRITE_UNIFORM_SCALING_FACTOR,
     },
 };
@@ -46,6 +44,8 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
 pub fn create_enemy(
     commands: &mut Commands,
     texture_atlas_handle: Handle<TextureAtlas>,
+    max_speed: f32,
+    velocity: Vec2,
     translation: Vec3,
 ) {
     commands
@@ -64,8 +64,8 @@ pub fn create_enemy(
             height: ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
         })
         .with(Motion {
-            max_speed: 50.,
-            velocity: Vec2::new(0., -50.),
+            max_speed,
+            velocity,
         })
         .with(Animatable {
             sprite_idx_delta: 1,

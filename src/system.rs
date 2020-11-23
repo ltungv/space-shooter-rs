@@ -4,7 +4,7 @@ use crate::{
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
-    prelude::{Mut, Res, TextureAtlasSprite, Time, Transform},
+    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform},
 };
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited
@@ -19,6 +19,18 @@ pub fn enemies_movement(
 ) {
     *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
     *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
+}
+
+pub fn enemies_despawner(
+    mut commands: Commands,
+    entity: Entity,
+    _enemy: &Enemy,
+    hit_box: &HitBox,
+    transform: Mut<Transform>,
+) {
+    if transform.translation.y() + hit_box.height / 2. <= -ARENA_HEIGHT / 2. {
+        commands.despawn(entity);
+    }
 }
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited

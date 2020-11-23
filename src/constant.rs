@@ -1,5 +1,6 @@
 pub const ARENA_WIDTH: f32 = 600.;
 pub const ARENA_HEIGHT: f32 = 800.;
+
 pub const SPRITE_UNIFORM_SCALING_FACTOR: f32 = 4.;
 
 pub const PLAYER_SPRITE_WIDTH: f32 = 16.;
