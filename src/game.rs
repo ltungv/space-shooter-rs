@@ -1,16 +1,16 @@
 use crate::{
     constant::{
-        ARENA_HEIGHT, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT,
+        ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT,
         ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
-        PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH, SPRITE_UNIFORM_SCALING_FACTOR,
+        PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
     },
     entity, system,
 };
 use bevy::prelude::{
     AppBuilder, AssetServer, Assets, Camera2dComponents, Commands, Handle, IntoForEachSystem,
-    IntoQuerySystem, Plugin, Res, ResMut, TextureAtlas, Vec2, Vec3,
+    IntoQuerySystem, Plugin, Res, ResMut, TextureAtlas, Timer, Vec2,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 /// A plugin that add and initialize all the entities and systems for running the game
 #[derive(Default)]
@@ -25,6 +25,7 @@ impl Plugin for Game {
             .add_system(system::player_control.system())
             .add_system(system::player_movement.system())
             .add_system(system::player_state_transition.system())
+            .add_system(system::enemies_spawner.system())
             .add_system(system::enemies_movement.system())
             .add_system(system::enemies_despawner.system())
             .add_system(system::entities_animation.system());
@@ -48,53 +49,7 @@ fn initialize_entities(mut commands: Commands, game_state: Res<GameState>) {
             .expect("Could not get player's texture atlas handle")
             .clone(),
     );
-    entity::create_enemy(
-        &mut commands,
-        game_state
-            .texture_atlas_handles
-            .get("enemy-small")
-            .expect("Could not get small enemy's texture atlas handle")
-            .clone(),
-        50.,
-        Vec2::new(0.0, -100.),
-        Vec3::new(
-            -150.,
-            (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.,
-            0.,
-        ),
-    );
-
-    entity::create_enemy(
-        &mut commands,
-        game_state
-            .texture_atlas_handles
-            .get("enemy-medium")
-            .expect("Could not get medium enemy's texture atlas handle")
-            .clone(),
-        50.,
-        Vec2::new(0.0, -80.),
-        Vec3::new(
-            0.,
-            (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.,
-            0.,
-        ),
-    );
-
-    entity::create_enemy(
-        &mut commands,
-        game_state
-            .texture_atlas_handles
-            .get("enemy-big")
-            .expect("Could not get big enemy's texture atlas handle")
-            .clone(),
-        50.,
-        Vec2::new(0.0, -60.),
-        Vec3::new(
-            150.,
-            (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.,
-            0.,
-        ),
-    );
+    entity::create_spawner(&mut commands, Timer::new(Duration::from_secs(2), true))
 }
 
 // TODO: Correct size and position of sprites for some sprite sheets

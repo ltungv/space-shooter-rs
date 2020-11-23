@@ -1,11 +1,19 @@
 use crate::{
-    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState},
-    constant::{ARENA_HEIGHT, ARENA_WIDTH},
+    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
+    constant::{
+        ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
+        SPRITE_UNIFORM_SCALING_FACTOR,
+    },
+    entity,
+    game::GameState,
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
-    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform},
+    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform, Vec2, Vec3},
 };
+use rand::prelude::*;
+
+// TODO: implement acceleration
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
@@ -28,8 +36,46 @@ pub fn enemies_despawner(
     hit_box: &HitBox,
     transform: Mut<Transform>,
 ) {
-    if transform.translation.y() + hit_box.height / 2. <= -ARENA_HEIGHT / 2. {
+    if transform.translation.y() + hit_box.height / 2. <= -ARENA_HEIGHT / 2.
+        || transform.translation.x() + hit_box.width / 2. <= -ARENA_WIDTH / 2.
+        || transform.translation.x() - hit_box.width / 2. >= ARENA_WIDTH / 2.
+    {
         commands.despawn(entity);
+    }
+}
+
+pub fn enemies_spawner(
+    mut commands: Commands,
+    time: Res<Time>,
+    game_state: Res<GameState>,
+    mut spawner: Mut<Spawner>,
+) {
+    spawner.spawn_timer.tick(time.delta_seconds);
+    if spawner.spawn_timer.just_finished {
+        // let max_width = ARENA_MAX_X - ARENA_SPAWN_OFFSET;
+        // let min_width = ARENA_MIN_X + ARENA_SPAWN_OFFSET;
+        // ARENA_MIN_X + ARENA_SPAWN_OFFSET + thread_rng().gen::<f32>() * (max_width - min_width)
+
+        let max_offset_x_from_center =
+            ARENA_WIDTH - ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR;
+        let min_width = -(max_offset_x_from_center) / 2.;
+        let max_width = (max_offset_x_from_center) / 2.;
+
+        entity::create_enemy(
+            &mut commands,
+            game_state
+                .texture_atlas_handles
+                .get("enemy-big")
+                .expect("Could not get small enemy's texture atlas handle")
+                .clone(),
+            100.,
+            Vec2::new(0.0, -100.),
+            Vec3::new(
+                min_width + rand::thread_rng().gen::<f32>() * (max_width - min_width),
+                (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.,
+                0.,
+            ),
+        );
     }
 }
 
@@ -45,26 +91,26 @@ pub fn player_movement(
     mut transform: Mut<Transform>,
 ) {
     // X-axis movement
-    let player_width_offset = (ARENA_WIDTH - hit_box.width) / 2.;
+    let max_offset_x_from_center = (ARENA_WIDTH - hit_box.width) / 2.;
     *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
     *transform.translation.x_mut() = transform
         .translation
         .x()
         // update bound
-        .min(player_width_offset)
+        .min(max_offset_x_from_center)
         // lower bound
-        .max(-player_width_offset);
+        .max(-max_offset_x_from_center);
 
     // Y-axis movement
-    let player_height_offset = (ARENA_HEIGHT - hit_box.height) / 2.;
+    let max_offset_y_from_center = (ARENA_HEIGHT - hit_box.height) / 2.;
     *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
     *transform.translation.y_mut() = transform
         .translation
         .y()
         // upper bound
-        .min(player_height_offset)
+        .min(max_offset_y_from_center)
         // lower bound
-        .max(-player_height_offset);
+        .max(-max_offset_y_from_center);
 }
 
 /// Change player's directions based on user's keyboard input

@@ -13,6 +13,10 @@ pub struct Player {
     pub transition_instant: Instant,
 }
 
+pub struct Spawner {
+    pub spawn_timer: Timer,
+}
+
 /// Different states of the player when moving left/right
 #[derive(Debug, PartialEq)]
 pub enum PlayerAnimationState {

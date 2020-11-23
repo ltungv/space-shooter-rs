@@ -1,5 +1,5 @@
 use crate::{
-    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState},
+    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
     constant::{
         ENEMY_BIG_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
         SPRITE_UNIFORM_SCALING_FACTOR,
@@ -72,4 +72,8 @@ pub fn create_enemy(
             sprite_count: 2,
             cycle_timer: Timer::new(Duration::from_millis(200), true),
         });
+}
+
+pub fn create_spawner(commands: &mut Commands, spawn_timer: Timer) {
+    commands.spawn((Spawner { spawn_timer },));
 }
