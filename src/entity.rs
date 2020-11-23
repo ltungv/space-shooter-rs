@@ -1,4 +1,4 @@
-use crate::component::{Animatable, Enemy, Motion2D, Player, PlayerAnimationState};
+use crate::component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState};
 use bevy::prelude::{
     Commands, Handle, SpriteSheetComponents, TextureAtlas, TextureAtlasSprite, Timer, Transform,
     Vec3,
@@ -10,7 +10,7 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(4.)),
+            transform: Transform::from_scale(Vec3::splat(4.0)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -19,9 +19,13 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
             transition_instant: Instant::now(),
             transition_duration: Duration::from_millis(100),
         })
-        .with(Motion2D {
+        .with(Motion{
             max_speed: 500.,
             ..Default::default()
+        })
+        .with(HitBox {
+            width: 16. * 4.,
+            height: 24. * 4.,
         })
         .with(Animatable {
             sprite_idx_delta: 5,
@@ -37,7 +41,6 @@ pub fn create_enemy(commands: &mut Commands, texture_atlas_handle: Handle<Textur
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
             transform: Transform {
-                scale: Vec3::splat(4.),
                 translation: Vec3::new(150., 0., 0.),
                 ..Default::default()
             },

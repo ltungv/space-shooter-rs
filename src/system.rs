@@ -1,10 +1,10 @@
-use crate::component::{Animatable, Motion2D, Player, PlayerAnimationState};
+use crate::{
+    component::{Animatable, HitBox, Motion, Player, PlayerAnimationState},
+    constant::{WINDOW_HEIGHT, WINDOW_WIDTH},
+};
 use bevy::{
     input::{keyboard::KeyCode, Input},
-    prelude::{
-        Assets, Handle, Mut, Res, TextureAtlas, TextureAtlasSprite, Time, Transform,
-        WindowDescriptor,
-    },
+    prelude::{Mut, Res, TextureAtlasSprite, Time, Transform},
 };
 
 /// Change player's position based on the moving speed and moving direction. Movement is limited
@@ -13,65 +13,37 @@ use bevy::{
 pub fn player_movement(
     // Resources
     time: Res<Time>,
-    window_description: Res<WindowDescriptor>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
-    // Player
     _player: &Player,
-    motion2d: &Motion2D,
-    // SpriteSheetComponents
-    sprite: &TextureAtlasSprite,
-    texture_atlas_handle: &Handle<TextureAtlas>,
+    motion: &Motion,
+    hit_box: &HitBox,
     mut transform: Mut<Transform>,
 ) {
-    // TODO: Component for storing the boundaries with having to recalculate on every pass
-    // Dimensions of the game's window
-    let window_width = window_description.width as f32;
-    let window_height = window_description.height as f32;
-    // Dimensions of the sprite that represents the player
-    let texture_atlas = texture_atlases
-        .get(texture_atlas_handle)
-        .expect("Could not get player's texture atlas");
-    let texture_rect = texture_atlas.textures[sprite.index as usize];
-    // Dimensions of the sprite that represents the player,
-    // after the scaling factor is applied
-    let player_width = texture_rect.width() * transform.scale.x();
-    let player_height = texture_rect.height() * transform.scale.y();
-
     // X-axis movement
-    *transform.translation.x_mut() += time.delta_seconds * motion2d.velocity.x();
+    let player_width_offset = (WINDOW_WIDTH - hit_box.width) / 2.;
+    *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
     *transform.translation.x_mut() = transform
         .translation
         .x()
         // update bound
-        .min((window_width - player_width) / 2.)
+        .min(player_width_offset)
         // lower bound
-        .max(-(window_width - player_width) / 2.);
+        .max(-player_width_offset);
 
     // Y-axis movement
-    *transform.translation.y_mut() += time.delta_seconds * motion2d.velocity.y();
+    let player_height_offset = (WINDOW_HEIGHT - hit_box.height) / 2.;
+    *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
     *transform.translation.y_mut() = transform
         .translation
         .y()
         // upper bound
-        .min((window_height - player_height) / 2.)
+        .min(player_height_offset)
         // lower bound
-        .max(-(window_height - player_height) / 2.);
+        .max(-player_height_offset);
 }
 
 /// Change player's directions based on user's keyboard input
-pub fn player_control(
-    kb_input: Res<Input<KeyCode>>,
-    _player: &Player,
-    mut motion2d: Mut<Motion2D>,
-) {
+pub fn player_control(kb_input: Res<Input<KeyCode>>, _player: &Player, mut motion: Mut<Motion>) {
     let mut x_direction = 0.;
-    let mut y_direction = 0.;
-    if kb_input.pressed(KeyCode::Up) {
-        y_direction += 1.;
-    }
-    if kb_input.pressed(KeyCode::Down) {
-        y_direction -= 1.;
-    }
     if kb_input.pressed(KeyCode::Left) {
         x_direction -= 1.;
     }
@@ -79,13 +51,21 @@ pub fn player_control(
         x_direction += 1.;
     }
 
-    // without this, player moves faster diaonally
+    let mut y_direction = 0.;
+    if kb_input.pressed(KeyCode::Up) {
+        y_direction += 1.;
+    }
+    if kb_input.pressed(KeyCode::Down) {
+        y_direction -= 1.;
+    }
+
+    // Ensure player speed is capped at `max_speed` when moving diagonally
     if x_direction != 0. && y_direction != 0. {
-        *motion2d.velocity.y_mut() = (motion2d.max_speed / f32::sqrt(2.)) * y_direction;
-        *motion2d.velocity.x_mut() = (motion2d.max_speed / f32::sqrt(2.)) * x_direction;
+        *motion.velocity.y_mut() = (motion.max_speed / f32::sqrt(2.)) * y_direction;
+        *motion.velocity.x_mut() = (motion.max_speed / f32::sqrt(2.)) * x_direction;
     } else {
-        *motion2d.velocity.y_mut() = motion2d.max_speed * y_direction;
-        *motion2d.velocity.x_mut() = motion2d.max_speed * x_direction;
+        *motion.velocity.y_mut() = motion.max_speed * y_direction;
+        *motion.velocity.x_mut() = motion.max_speed * x_direction;
     }
 }
 
@@ -95,14 +75,14 @@ pub fn player_control(
 pub fn player_state_transition(
     time: Res<Time>,
     mut player: Mut<Player>,
-    motion2d: &Motion2D,
+    motion: &Motion,
     mut sprite: Mut<TextureAtlasSprite>,
 ) {
     // State is not changed rapidly so that animation can be perceived by the player
     if let Some(now) = time.instant {
         if now.duration_since(player.transition_instant) >= player.transition_duration {
             // Determines the new state based on previous state and current moving direction
-            let x_velocity = motion2d.velocity.x();
+            let x_velocity = motion.velocity.x();
             let new_animation_state = if x_velocity < 0. {
                 match player.animation_state {
                     PlayerAnimationState::Stabilized => PlayerAnimationState::HalfLeft,

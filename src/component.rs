@@ -25,7 +25,7 @@ pub enum PlayerAnimationState {
 
 /// Component that determines how entities move within the 2D space
 #[derive(Debug, PartialEq, Default)]
-pub struct Motion2D {
+pub struct Motion {
     // TODO: movement on different axis can have different speed
     pub max_speed: f32,
     pub velocity: Vec2,
@@ -38,4 +38,10 @@ pub struct Animatable {
     pub sprite_idx_delta: u32,
     pub sprite_count: u32,
     pub cycle_timer: Timer,
+}
+
+/// Component that determines the smallest possible box that includes rendered the entity.
+pub struct HitBox {
+    pub width: f32,
+    pub height: f32,
 }
