@@ -15,6 +15,9 @@ pub struct Player {
 
 pub struct Spawner {
     pub spawn_timer: Timer,
+
+    /// Name-Probability pairs
+    pub spawn_prob_weights: Vec<(String, u8)>,
 }
 
 /// Different states of the player when moving left/right

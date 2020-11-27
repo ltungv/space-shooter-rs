@@ -1,15 +1,12 @@
 use crate::{
     component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
-    constant::{
-        ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
-        SPRITE_UNIFORM_SCALING_FACTOR,
-    },
+    constant::{ARENA_HEIGHT, ARENA_WIDTH, SPRITE_UNIFORM_SCALING_FACTOR},
     entity,
     game::GameState,
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
-    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform, Vec3},
+    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform, Vec2, Vec3},
 };
 use rand::prelude::*;
 
@@ -52,22 +49,33 @@ pub fn enemies_spawner(
 ) {
     spawner.spawn_timer.tick(time.delta_seconds);
     if spawner.spawn_timer.just_finished {
-        let max_offset_x_from_center =
-            ARENA_WIDTH - ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR;
+        let mut rng = rand::thread_rng();
+        let spawnable_name = &spawner
+            .spawn_prob_weights
+            .choose_weighted(&mut rng, |item| item.1)
+            .expect("Could not choose spawnable")
+            .0;
+
+        // TODO: Find other ways to handle sprite size and scaling for hitbox
+        let texture_atlas = game_state
+            .texture_atlases
+            .get(spawnable_name)
+            .expect("Could not get texture from handle.");
+
+        let texture_width = texture_atlas.1.x();
+        let texture_height = texture_atlas.1.y();
+
+        let max_offset_x_from_center = ARENA_WIDTH - texture_height * SPRITE_UNIFORM_SCALING_FACTOR;
         let min_width = -(max_offset_x_from_center) / 2.;
         let max_width = (max_offset_x_from_center) / 2.;
 
-        let translation_x = min_width + rand::thread_rng().gen::<f32>() * (max_width - min_width);
-        let translation_y =
-            (ARENA_HEIGHT + ENEMY_BIG_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR) / 2.;
+        let translation_x = min_width + rng.gen::<f32>() * (max_width - min_width);
+        let translation_y = (ARENA_HEIGHT + texture_height * SPRITE_UNIFORM_SCALING_FACTOR) / 2.;
 
         entity::create_enemy(
             &mut commands,
-            game_state
-                .texture_atlas_handles
-                .get("enemy-big")
-                .expect("Could not get small enemy's texture atlas handle")
-                .clone(),
+            texture_atlas.0.clone(),
+            Vec2::new(texture_width, texture_height),
             Vec3::new(translation_x, translation_y, 0.),
         );
     }

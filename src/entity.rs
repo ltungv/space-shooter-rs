@@ -1,9 +1,6 @@
 use crate::{
     component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
-    constant::{
-        ENEMY_BIG_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH,
-        SPRITE_UNIFORM_SCALING_FACTOR,
-    },
+    constant::{PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH, SPRITE_UNIFORM_SCALING_FACTOR},
 };
 use bevy::prelude::{
     Commands, Handle, SpriteSheetComponents, TextureAtlas, TextureAtlasSprite, Timer, Transform,
@@ -44,6 +41,7 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
 pub fn create_enemy(
     commands: &mut Commands,
     texture_atlas_handle: Handle<TextureAtlas>,
+    texture_size: Vec2,
     translation: Vec3,
 ) {
     commands
@@ -58,12 +56,12 @@ pub fn create_enemy(
         })
         .with(Enemy)
         .with(HitBox {
-            width: ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
-            height: ENEMY_BIG_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
+            width: texture_size.x() * SPRITE_UNIFORM_SCALING_FACTOR,
+            height: texture_size.y() * SPRITE_UNIFORM_SCALING_FACTOR,
         })
         .with(Motion {
             max_speed: 100.0,
-            velocity: Vec2::new(0.0, -80),
+            velocity: Vec2::new(0.0, -80.),
         })
         .with(Animatable {
             sprite_idx_delta: 1,
@@ -72,6 +70,13 @@ pub fn create_enemy(
         });
 }
 
-pub fn create_spawner(commands: &mut Commands, spawn_timer: Timer) {
-    commands.spawn((Spawner { spawn_timer },));
+pub fn create_enemies_spawner(commands: &mut Commands, spawn_timer: Timer) {
+    commands.spawn((Spawner {
+        spawn_timer,
+        spawn_prob_weights: vec![
+            ("enemy-small".to_string(), 5),
+            ("enemy-medium".to_string(), 3),
+            ("enemy-big".to_string(), 2),
+        ],
+    },));
 }

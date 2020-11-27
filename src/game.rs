@@ -35,7 +35,7 @@ impl Plugin for Game {
 /// A structure for holding general game states that are shared across multiple systems
 #[derive(Default)]
 pub struct GameState {
-    pub texture_atlas_handles: HashMap<String, Handle<TextureAtlas>>,
+    pub texture_atlases: HashMap<String, (Handle<TextureAtlas>, Vec2)>,
 }
 
 /// Create initial entities for the game to work
@@ -44,12 +44,13 @@ fn initialize_entities(mut commands: Commands, game_state: Res<GameState>) {
     entity::create_player(
         &mut commands,
         game_state
-            .texture_atlas_handles
+            .texture_atlases
             .get("ship")
             .expect("Could not get player's texture atlas handle")
+            .0
             .clone(),
     );
-    entity::create_spawner(&mut commands, Timer::new(Duration::from_secs(2), true))
+    entity::create_enemies_spawner(&mut commands, Timer::new(Duration::from_secs(2), true))
 }
 
 // TODO: Correct size and position of sprites for some sprite sheets
@@ -59,59 +60,59 @@ fn load_spritesheets(
     mut game_state: ResMut<GameState>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    // Loading spritesheets into texture atlases
-    game_state.texture_atlas_handles.insert(
+    let sprite_size = Vec2::new(PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
+    game_state.texture_atlases.insert(
         "ship".to_string(),
-        texture_atlases.add(TextureAtlas::from_grid(
-            asset_server.load("spritesheets/ship.png"),
-            Vec2::new(PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT),
-            5,
-            2,
-        )),
+        (
+            texture_atlases.add(TextureAtlas::from_grid(
+                asset_server.load("spritesheets/ship.png"),
+                sprite_size,
+                5,
+                2,
+            )),
+            sprite_size,
+        ),
     );
-    game_state.texture_atlas_handles.insert(
+
+    let sprite_size = Vec2::new(ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT);
+    game_state.texture_atlases.insert(
         "enemy-big".to_string(),
-        texture_atlases.add(TextureAtlas::from_grid(
-            asset_server.load("spritesheets/enemy-big.png"),
-            Vec2::new(ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT),
-            2,
-            1,
-        )),
+        (
+            texture_atlases.add(TextureAtlas::from_grid(
+                asset_server.load("spritesheets/enemy-big.png"),
+                sprite_size,
+                2,
+                1,
+            )),
+            sprite_size,
+        ),
     );
-    game_state.texture_atlas_handles.insert(
+
+    let sprite_size = Vec2::new(ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT);
+    game_state.texture_atlases.insert(
         "enemy-medium".to_string(),
-        texture_atlases.add(TextureAtlas::from_grid(
-            asset_server.load("spritesheets/enemy-medium.png"),
-            Vec2::new(ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT),
-            2,
-            1,
-        )),
+        (
+            texture_atlases.add(TextureAtlas::from_grid(
+                asset_server.load("spritesheets/enemy-medium.png"),
+                sprite_size,
+                2,
+                1,
+            )),
+            sprite_size,
+        ),
     );
-    game_state.texture_atlas_handles.insert(
+
+    let sprite_size = Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT);
+    game_state.texture_atlases.insert(
         "enemy-small".to_string(),
-        texture_atlases.add(TextureAtlas::from_grid(
-            asset_server.load("spritesheets/enemy-small.png"),
-            Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
-            2,
-            1,
-        )),
-    );
-    game_state.texture_atlas_handles.insert(
-        "explosion".to_string(),
-        texture_atlases.add(TextureAtlas::from_grid(
-            asset_server.load("spritesheets/explosion.png"),
-            Vec2::new(16., 16.),
-            5,
-            1,
-        )),
-    );
-    game_state.texture_atlas_handles.insert(
-        "laser-bolts".to_string(),
-        texture_atlases.add(TextureAtlas::from_grid(
-            asset_server.load("spritesheets/explosion.png"),
-            Vec2::new(16., 16.),
-            2,
-            2,
-        )),
+        (
+            texture_atlases.add(TextureAtlas::from_grid(
+                asset_server.load("spritesheets/enemy-small.png"),
+                sprite_size,
+                2,
+                1,
+            )),
+            sprite_size,
+        ),
     );
 }
