@@ -1,6 +1,6 @@
 use crate::{
     component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
-    constant::{ARENA_HEIGHT, ARENA_WIDTH, SPRITE_UNIFORM_SCALING_FACTOR},
+    constant::{ARENA_HEIGHT, ARENA_WIDTH},
     entity,
     game::GameState,
 };
@@ -65,12 +65,12 @@ pub fn enemies_spawner(
         let texture_width = texture_atlas.1.x();
         let texture_height = texture_atlas.1.y();
 
-        let max_offset_x_from_center = ARENA_WIDTH - texture_height * SPRITE_UNIFORM_SCALING_FACTOR;
+        let max_offset_x_from_center = ARENA_WIDTH - texture_height;
         let min_width = -(max_offset_x_from_center) / 2.;
         let max_width = (max_offset_x_from_center) / 2.;
 
         let translation_x = min_width + rng.gen::<f32>() * (max_width - min_width);
-        let translation_y = (ARENA_HEIGHT + texture_height * SPRITE_UNIFORM_SCALING_FACTOR) / 2.;
+        let translation_y = (ARENA_HEIGHT + texture_height) / 2.;
 
         entity::create_enemy(
             &mut commands,

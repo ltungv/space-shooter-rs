@@ -1,6 +1,6 @@
 use crate::{
     component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
-    constant::{PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH, SPRITE_UNIFORM_SCALING_FACTOR},
+    constant::{PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH},
 };
 use bevy::prelude::{
     Commands, Handle, SpriteSheetComponents, TextureAtlas, TextureAtlasSprite, Timer, Transform,
@@ -13,7 +13,6 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(SPRITE_UNIFORM_SCALING_FACTOR)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -23,8 +22,8 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
             transition_duration: Duration::from_millis(100),
         })
         .with(HitBox {
-            width: PLAYER_SPRITE_WIDTH * SPRITE_UNIFORM_SCALING_FACTOR,
-            height: PLAYER_SPRITE_HEIGHT * SPRITE_UNIFORM_SCALING_FACTOR,
+            width: PLAYER_SPRITE_WIDTH,
+            height: PLAYER_SPRITE_HEIGHT,
         })
         .with(Motion {
             max_speed: 500.,
@@ -49,15 +48,14 @@ pub fn create_enemy(
             texture_atlas: texture_atlas_handle,
             transform: Transform {
                 translation,
-                scale: Vec3::splat(SPRITE_UNIFORM_SCALING_FACTOR),
                 ..Default::default()
             },
             ..Default::default()
         })
         .with(Enemy)
         .with(HitBox {
-            width: texture_size.x() * SPRITE_UNIFORM_SCALING_FACTOR,
-            height: texture_size.y() * SPRITE_UNIFORM_SCALING_FACTOR,
+            width: texture_size.x(),
+            height: texture_size.y(),
         })
         .with(Motion {
             max_speed: 100.0,
