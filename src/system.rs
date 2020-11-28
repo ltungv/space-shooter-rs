@@ -1,5 +1,5 @@
 use crate::{
-    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
+    component::{Animatable, Enemy, HitBox, Motion, Ship, ShipAnimationState, Spawner},
     constant::{ARENA_HEIGHT, ARENA_WIDTH},
     entity,
     game::GameState,
@@ -12,7 +12,7 @@ use rand::prelude::*;
 
 // TODO: implement acceleration
 
-/// Change player's position based on the moving speed and moving direction. Movement is limited
+/// Change ship's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
 #[allow(clippy::too_many_arguments)]
 pub fn enemies_movement(
@@ -81,13 +81,13 @@ pub fn enemies_spawner(
     }
 }
 
-/// Change player's position based on the moving speed and moving direction. Movement is limited
+/// Change ship's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
 #[allow(clippy::too_many_arguments)]
-pub fn player_movement(
+pub fn ship_movement(
     // Resources
     time: Res<Time>,
-    _player: &Player,
+    _ship: &Ship,
     motion: &Motion,
     hit_box: &HitBox,
     mut transform: Mut<Transform>,
@@ -115,8 +115,8 @@ pub fn player_movement(
         .max(-max_offset_y_from_center);
 }
 
-/// Change player's directions based on user's keyboard input
-pub fn player_control(kb_input: Res<Input<KeyCode>>, _player: &Player, mut motion: Mut<Motion>) {
+/// Change ship's directions based on user's keyboard input
+pub fn ship_control(kb_input: Res<Input<KeyCode>>, _ship: &Ship, mut motion: Mut<Motion>) {
     let mut x_direction = 0.;
     if kb_input.pressed(KeyCode::Left) {
         x_direction -= 1.;
@@ -133,7 +133,7 @@ pub fn player_control(kb_input: Res<Input<KeyCode>>, _player: &Player, mut motio
         y_direction -= 1.;
     }
 
-    // Ensure player speed is capped at `max_speed` when moving diagonally
+    // Ensure ship speed is capped at `max_speed` when moving diagonally
     if x_direction != 0. && y_direction != 0. {
         *motion.velocity.y_mut() = (motion.max_speed / f32::sqrt(2.)) * y_direction;
         *motion.velocity.x_mut() = (motion.max_speed / f32::sqrt(2.)) * x_direction;
@@ -143,58 +143,58 @@ pub fn player_control(kb_input: Res<Input<KeyCode>>, _player: &Player, mut motio
     }
 }
 
-/// Change the player's animation state and change the current index to the index of the sprite
-/// that represents that state. The player has to be in the new state for at least some set amount
+/// Change the ship's animation state and change the current index to the index of the sprite
+/// that represents that state. The ship has to be in the new state for at least some set amount
 /// of duration before being able to change its state again
-pub fn player_state_transition(
+pub fn ship_state_transition(
     time: Res<Time>,
-    mut player: Mut<Player>,
+    mut ship: Mut<Ship>,
     motion: &Motion,
     mut sprite: Mut<TextureAtlasSprite>,
 ) {
-    // State is not changed rapidly so that animation can be perceived by the player
+    // State is not changed rapidly so that animation can be perceived by the ship
     if let Some(now) = time.instant {
-        if now.duration_since(player.transition_instant) >= player.transition_duration {
+        if now.duration_since(ship.transition_instant) >= ship.transition_duration {
             // Determines the new state based on previous state and current moving direction
             let x_velocity = motion.velocity.x();
             let new_animation_state = if x_velocity < 0. {
-                match player.animation_state {
-                    PlayerAnimationState::Stabilized => PlayerAnimationState::HalfLeft,
-                    PlayerAnimationState::HalfRight => PlayerAnimationState::Stabilized,
-                    PlayerAnimationState::FullRight => PlayerAnimationState::HalfRight,
-                    PlayerAnimationState::HalfLeft | PlayerAnimationState::FullLeft => {
-                        PlayerAnimationState::FullLeft
+                match ship.animation_state {
+                    ShipAnimationState::Stabilized => ShipAnimationState::HalfLeft,
+                    ShipAnimationState::HalfRight => ShipAnimationState::Stabilized,
+                    ShipAnimationState::FullRight => ShipAnimationState::HalfRight,
+                    ShipAnimationState::HalfLeft | ShipAnimationState::FullLeft => {
+                        ShipAnimationState::FullLeft
                     }
                 }
             } else if x_velocity > 0. {
-                match player.animation_state {
-                    PlayerAnimationState::Stabilized => PlayerAnimationState::HalfRight,
-                    PlayerAnimationState::HalfLeft => PlayerAnimationState::Stabilized,
-                    PlayerAnimationState::FullLeft => PlayerAnimationState::HalfLeft,
-                    PlayerAnimationState::HalfRight | PlayerAnimationState::FullRight => {
-                        PlayerAnimationState::FullRight
+                match ship.animation_state {
+                    ShipAnimationState::Stabilized => ShipAnimationState::HalfRight,
+                    ShipAnimationState::HalfLeft => ShipAnimationState::Stabilized,
+                    ShipAnimationState::FullLeft => ShipAnimationState::HalfLeft,
+                    ShipAnimationState::HalfRight | ShipAnimationState::FullRight => {
+                        ShipAnimationState::FullRight
                     }
                 }
             } else {
-                match player.animation_state {
-                    PlayerAnimationState::FullLeft => PlayerAnimationState::HalfLeft,
-                    PlayerAnimationState::FullRight => PlayerAnimationState::HalfRight,
-                    PlayerAnimationState::Stabilized
-                    | PlayerAnimationState::HalfRight
-                    | PlayerAnimationState::HalfLeft => PlayerAnimationState::Stabilized,
+                match ship.animation_state {
+                    ShipAnimationState::FullLeft => ShipAnimationState::HalfLeft,
+                    ShipAnimationState::FullRight => ShipAnimationState::HalfRight,
+                    ShipAnimationState::Stabilized
+                    | ShipAnimationState::HalfRight
+                    | ShipAnimationState::HalfLeft => ShipAnimationState::Stabilized,
                 }
             };
 
             // Updates if state is changed
-            if new_animation_state != player.animation_state {
-                player.transition_instant = now;
-                player.animation_state = new_animation_state;
-                sprite.index = match player.animation_state {
-                    PlayerAnimationState::FullLeft => 0,
-                    PlayerAnimationState::HalfLeft => 1,
-                    PlayerAnimationState::Stabilized => 2,
-                    PlayerAnimationState::HalfRight => 3,
-                    PlayerAnimationState::FullRight => 4,
+            if new_animation_state != ship.animation_state {
+                ship.transition_instant = now;
+                ship.animation_state = new_animation_state;
+                sprite.index = match ship.animation_state {
+                    ShipAnimationState::FullLeft => 0,
+                    ShipAnimationState::HalfLeft => 1,
+                    ShipAnimationState::Stabilized => 2,
+                    ShipAnimationState::HalfRight => 3,
+                    ShipAnimationState::FullRight => 4,
                 };
             }
         }

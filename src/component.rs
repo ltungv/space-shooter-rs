@@ -1,28 +1,22 @@
 use bevy::prelude::{Timer, Vec2};
 use std::time::{Duration, Instant};
 
-/// Component that marks an entity to be an enemy in the game
-#[derive(Debug, Default)]
-pub struct Enemy;
-
-/// Component that marks an entity to be a player in the game
-#[derive(Debug)]
-pub struct Player {
-    pub animation_state: PlayerAnimationState,
-    pub transition_duration: Duration,
-    pub transition_instant: Instant,
-}
-
-pub struct Spawner {
-    pub spawn_timer: Timer,
-
-    /// Name-Probability pairs
-    pub spawn_prob_weights: Vec<(String, u8)>,
-}
-
-/// Different states of the player when moving left/right
 #[derive(Debug, PartialEq)]
-pub enum PlayerAnimationState {
+pub enum EnemyVariant {
+    Small,
+    Medium,
+    Big,
+}
+
+/// Component that marks an entity to be an enemy in the game
+#[derive(Debug)]
+pub struct Enemy {
+    pub variant: EnemyVariant,
+}
+
+/// Different states of the  when moving left/right
+#[derive(Debug, PartialEq)]
+pub enum ShipAnimationState {
     FullLeft,
     HalfLeft,
     Stabilized,
@@ -30,8 +24,24 @@ pub enum PlayerAnimationState {
     FullRight,
 }
 
+/// Component that marks an entity to be a ship in the game
+#[derive(Debug)]
+pub struct Ship {
+    pub animation_state: ShipAnimationState,
+    pub transition_duration: Duration,
+    pub transition_instant: Instant,
+}
+
+#[derive(Debug)]
+pub struct Spawner {
+    pub spawn_timer: Timer,
+
+    /// Name-Probability pairs
+    pub spawn_prob_weights: Vec<(String, u8)>,
+}
+
 /// Component that determines how entities move within the 2D space
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug)]
 pub struct Motion {
     // TODO: movement on different axis can have different speed
     pub max_speed: f32,
@@ -48,6 +58,7 @@ pub struct Animatable {
 }
 
 /// Component that determines the smallest possible box that includes rendered the entity.
+#[derive(Debug)]
 pub struct HitBox {
     pub width: f32,
     pub height: f32,

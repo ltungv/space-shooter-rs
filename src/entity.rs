@@ -1,33 +1,44 @@
-use crate::{
-    component::{Animatable, Enemy, HitBox, Motion, Player, PlayerAnimationState, Spawner},
-    constant::{PLAYER_SPRITE_HEIGHT, PLAYER_SPRITE_WIDTH},
-};
-use bevy::prelude::{
-    Commands, Handle, SpriteSheetComponents, TextureAtlas, TextureAtlasSprite, Timer, Transform,
-    Vec2, Vec3,
-};
+use crate::component::*;
+use crate::constant::*;
+use bevy::prelude::*;
 use std::time::{Duration, Instant};
 
-/// Add a new entity to the world with all the needed components to represent a player
-pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<TextureAtlas>) {
+pub fn initialize_camera(mut commands: Commands) {
+    commands.spawn(Camera2dComponents::default());
+}
+
+/// Add a new entity to the world with all the needed components to represent a ship
+pub fn initialize_ship(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    let texture_atlas = TextureAtlas::from_grid(
+        asset_server.load("spritesheets/ship.png"),
+        Vec2::new(SHIP_SPRITE_WIDTH, SHIP_SPRITE_HEIGHT),
+        5,
+        2,
+    );
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
-        .with(Player {
-            animation_state: PlayerAnimationState::Stabilized,
+        .with(Ship {
+            animation_state: ShipAnimationState::Stabilized,
             transition_instant: Instant::now(),
             transition_duration: Duration::from_millis(100),
         })
         .with(HitBox {
-            width: PLAYER_SPRITE_WIDTH,
-            height: PLAYER_SPRITE_HEIGHT,
+            width: SHIP_SPRITE_WIDTH,
+            height: SHIP_SPRITE_HEIGHT,
         })
         .with(Motion {
             max_speed: 500.,
-            ..Default::default()
+            velocity: Vec2::default(),
         })
         .with(Animatable {
             sprite_idx_delta: 5,
@@ -40,7 +51,7 @@ pub fn create_player(commands: &mut Commands, texture_atlas_handle: Handle<Textu
 pub fn create_enemy(
     commands: &mut Commands,
     texture_atlas_handle: Handle<TextureAtlas>,
-    texture_size: Vec2,
+    variant: EnemyVariant,
     translation: Vec3,
 ) {
     commands
@@ -52,10 +63,18 @@ pub fn create_enemy(
             },
             ..Default::default()
         })
-        .with(Enemy)
+        .with(Enemy { variant })
         .with(HitBox {
-            width: texture_size.x(),
-            height: texture_size.y(),
+            width: match variant {
+                EnemyVariant::Small => ENEMY_SMALL_SPRITE_WIDTH,
+                EnemyVariant::Medium => ENEMY_MEDIUM_SPRITE_WIDTH,
+                EnemyVariant::Big => ENEMY_BIG_SPRITE_WIDTH,
+            },
+            height: match variant {
+                EnemyVariant::Small => ENEMY_SMALL_SPRITE_HEIGHT,
+                EnemyVariant::Medium => ENEMY_MEDIUM_SPRITE_HEIGHT,
+                EnemyVariant::Big => ENEMY_BIG_SPRITE_HEIGHT,
+            },
         })
         .with(Motion {
             max_speed: 100.0,
@@ -72,9 +91,9 @@ pub fn create_enemies_spawner(commands: &mut Commands, spawn_timer: Timer) {
     commands.spawn((Spawner {
         spawn_timer,
         spawn_prob_weights: vec![
-            ("enemy-small".to_string(), 5),
-            ("enemy-medium".to_string(), 3),
-            ("enemy-big".to_string(), 2),
+            ("small".to_string(), 5),
+            ("medium".to_string(), 3),
+            ("big".to_string(), 2),
         ],
     },));
 }
