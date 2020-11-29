@@ -82,9 +82,9 @@ pub fn initialize_enemies_spawner(mut commands: Commands) {
     commands.spawn((EnemySpawner {
         timer: Timer::new(ENEMY_SPAWN_INTERVAL, true),
         weights: vec![
-            ("small".to_string(), 5),
-            ("medium".to_string(), 3),
-            ("big".to_string(), 2),
+            ("small".to_string(), SPAWN_WEIGHT_ENEMY_SMALL),
+            ("medium".to_string(), SPAWN_WEIGHT_ENEMY_MEDIUM),
+            ("big".to_string(), SPAWN_WEIGHT_ENEMY_BIG),
         ],
     },));
 }
