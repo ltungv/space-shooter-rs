@@ -42,6 +42,8 @@ pub fn enemies_despawner(
     }
 }
 
+/// Go through all enemy spawners and check if they ready to spawn new entity,
+/// create entity as the spawn timer finishes.
 pub fn enemies_spawner(
     mut commands: Commands,
     time: Res<Time>,
@@ -50,6 +52,7 @@ pub fn enemies_spawner(
 ) {
     spawner.timer.tick(time.delta_seconds);
     if spawner.timer.just_finished {
+        // Choose the name of the enemy to be spawned
         let mut rng = rand::thread_rng();
         let variant_name = &spawner
             .weights
@@ -58,6 +61,7 @@ pub fn enemies_spawner(
             .0;
 
         if let Some(enemy_data) = game_state.enemy_data.get(variant_name) {
+            // Enemy comes from the top of the screen with random x-axis position
             let x_offset = (ARENA_WIDTH - enemy_data.hit_box.width) / 2.;
             let translation_x = -x_offset + rng.gen::<f32>() * (2. * x_offset);
             let translation_y = (ARENA_HEIGHT + enemy_data.hit_box.height) / 2.;
@@ -88,9 +92,7 @@ pub fn ship_movement(
     *transform.translation.x_mut() = transform
         .translation
         .x()
-        // update bound
         .min(max_offset_x_from_center)
-        // lower bound
         .max(-max_offset_x_from_center);
 
     // Y-axis movement
@@ -99,9 +101,7 @@ pub fn ship_movement(
     *transform.translation.y_mut() = transform
         .translation
         .y()
-        // upper bound
         .min(max_offset_y_from_center)
-        // lower bound
         .max(-max_offset_y_from_center);
 }
 

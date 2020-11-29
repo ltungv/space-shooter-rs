@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use std::time::{Duration, Instant};
 
+/// The type of enemy
 #[derive(Debug, PartialEq, Clone)]
 pub enum EnemyVariant {
     Small,
@@ -8,6 +9,7 @@ pub enum EnemyVariant {
     Big,
 }
 
+/// Component marks an entity to be an enemy
 #[derive(Debug)]
 pub struct Enemy {
     pub variant: EnemyVariant,
@@ -31,6 +33,7 @@ pub struct Ship {
     pub transition_instant: Instant,
 }
 
+/// Component determines the spawn rate and spawn probability of entities
 #[derive(Debug)]
 pub struct EnemySpawner {
     pub timer: Timer,

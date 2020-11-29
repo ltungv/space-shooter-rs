@@ -6,6 +6,7 @@ use crate::{
 use bevy::prelude::*;
 use std::time::Instant;
 
+/// Create a camera
 pub fn initialize_camera(mut commands: Commands) {
     commands.spawn(Camera2dComponents::default());
 }
@@ -76,6 +77,7 @@ pub fn create_enemy(commands: &mut Commands, translation: Vec3, enemy_data: Enem
         });
 }
 
+/// Create a new enemy spawner
 pub fn initialize_enemies_spawner(mut commands: Commands) {
     commands.spawn((EnemySpawner {
         timer: Timer::new(ENEMY_SPAWN_INTERVAL, true),
