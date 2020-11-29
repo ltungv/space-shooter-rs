@@ -19,6 +19,6 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(game::Game::default())
+        .add_plugin(game::Game)
         .run();
 }

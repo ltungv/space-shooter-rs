@@ -1,12 +1,10 @@
 use crate::{
-    component::{
-        Animation, Enemy, EnemySpawner, EnemyVariant, HitBox, Motion, Ship, ShipAnimationState,
-    },
-    constant::{SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH},
+    component::{Animation, Enemy, EnemySpawner, HitBox, Motion, Ship, ShipAnimationState},
+    constant::*,
     resource::EnemyData,
 };
 use bevy::prelude::*;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub fn initialize_camera(mut commands: Commands) {
     commands.spawn(Camera2dComponents::default());
@@ -35,56 +33,52 @@ pub fn initialize_ship(
         .with(Ship {
             animation_state: ShipAnimationState::Stabilized,
             transition_instant: Instant::now(),
-            transition_duration: Duration::from_millis(100),
+            transition_duration: SHIP_STATE_TRANSITION_DURATION,
         })
         .with(HitBox {
             width: SHIP_SPRITE_WIDTH,
             height: SHIP_SPRITE_HEIGHT,
         })
         .with(Motion {
-            max_speed: 500.,
+            max_speed: SHIP_MAX_SPEED,
             velocity: Vec2::default(),
         })
         .with(Animation {
             idx_delta: 5,
             sprite_count: 10,
-            timer: Timer::new(Duration::from_millis(200), true),
+            timer: Timer::new(ANIMATION_INTERVAL, true),
         });
 }
 
 /// Add a new entity to the world with all the needed components to represent an enemy
-pub fn create_enemy(
-    commands: &mut Commands,
-    texture_atlas_handle: Handle<TextureAtlas>,
-    variant: EnemyVariant,
-    hit_box: HitBox,
-    translation: Vec3,
-) {
+pub fn create_enemy(commands: &mut Commands, translation: Vec3, enemy_data: EnemyData) {
     commands
         .spawn(SpriteSheetComponents {
-            texture_atlas: texture_atlas_handle,
+            texture_atlas: enemy_data.texture_atlas_handle,
             transform: Transform {
                 translation,
                 ..Default::default()
             },
             ..Default::default()
         })
-        .with(Enemy { variant })
-        .with(hit_box)
+        .with(Enemy {
+            variant: enemy_data.variant,
+        })
+        .with(enemy_data.hit_box)
         .with(Motion {
-            max_speed: 100.0,
-            velocity: Vec2::new(0.0, -80.),
+            max_speed: ENEMY_MAX_SPEED,
+            velocity: Vec2::new(ENEMY_INITIAL_VELOCITY.0, ENEMY_INITIAL_VELOCITY.1),
         })
         .with(Animation {
             idx_delta: 1,
             sprite_count: 2,
-            timer: Timer::new(Duration::from_millis(200), true),
+            timer: Timer::new(ANIMATION_INTERVAL, true),
         });
 }
 
 pub fn initialize_enemies_spawner(mut commands: Commands) {
     commands.spawn((EnemySpawner {
-        timer: Timer::new(Duration::from_secs(1), true),
+        timer: Timer::new(ENEMY_SPAWN_INTERVAL, true),
         weights: vec![
             ("small".to_string(), 5),
             ("medium".to_string(), 3),

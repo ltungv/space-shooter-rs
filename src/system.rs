@@ -8,7 +8,7 @@ use crate::{
     component::{Animation, Enemy, EnemySpawner, HitBox, Motion, Ship, ShipAnimationState},
     constant::{ARENA_HEIGHT, ARENA_WIDTH},
     entity,
-    game::GameState,
+    resource::GameState,
 };
 
 // TODO: implement acceleration
@@ -64,10 +64,8 @@ pub fn enemies_spawner(
 
             entity::create_enemy(
                 &mut commands,
-                enemy_data.texture_atlas_handle.clone(),
-                enemy_data.variant.clone(),
-                enemy_data.hit_box.clone(),
                 Vec3::new(translation_x, translation_y, 0.),
+                enemy_data.clone(),
             );
         }
     }
