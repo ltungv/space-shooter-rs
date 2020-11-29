@@ -2,6 +2,7 @@ mod component;
 mod constant;
 mod entity;
 mod game;
+mod resource;
 mod system;
 
 use bevy::prelude::{App, DefaultPlugins, WindowDescriptor};

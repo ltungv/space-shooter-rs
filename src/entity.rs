@@ -1,5 +1,10 @@
-use crate::component::*;
-use crate::constant::*;
+use crate::{
+    component::{
+        Animation, Enemy, EnemySpawner, EnemyVariant, HitBox, Motion, Ship, ShipAnimationState,
+    },
+    constant::{SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH},
+    resource::EnemyData,
+};
 use bevy::prelude::*;
 use std::time::{Duration, Instant};
 
@@ -40,10 +45,10 @@ pub fn initialize_ship(
             max_speed: 500.,
             velocity: Vec2::default(),
         })
-        .with(Animatable {
-            sprite_idx_delta: 5,
+        .with(Animation {
+            idx_delta: 5,
             sprite_count: 10,
-            cycle_timer: Timer::new(Duration::from_millis(200), true),
+            timer: Timer::new(Duration::from_millis(200), true),
         });
 }
 
@@ -52,6 +57,7 @@ pub fn create_enemy(
     commands: &mut Commands,
     texture_atlas_handle: Handle<TextureAtlas>,
     variant: EnemyVariant,
+    hit_box: HitBox,
     translation: Vec3,
 ) {
     commands
@@ -64,33 +70,22 @@ pub fn create_enemy(
             ..Default::default()
         })
         .with(Enemy { variant })
-        .with(HitBox {
-            width: match variant {
-                EnemyVariant::Small => ENEMY_SMALL_SPRITE_WIDTH,
-                EnemyVariant::Medium => ENEMY_MEDIUM_SPRITE_WIDTH,
-                EnemyVariant::Big => ENEMY_BIG_SPRITE_WIDTH,
-            },
-            height: match variant {
-                EnemyVariant::Small => ENEMY_SMALL_SPRITE_HEIGHT,
-                EnemyVariant::Medium => ENEMY_MEDIUM_SPRITE_HEIGHT,
-                EnemyVariant::Big => ENEMY_BIG_SPRITE_HEIGHT,
-            },
-        })
+        .with(hit_box)
         .with(Motion {
             max_speed: 100.0,
             velocity: Vec2::new(0.0, -80.),
         })
-        .with(Animatable {
-            sprite_idx_delta: 1,
+        .with(Animation {
+            idx_delta: 1,
             sprite_count: 2,
-            cycle_timer: Timer::new(Duration::from_millis(200), true),
+            timer: Timer::new(Duration::from_millis(200), true),
         });
 }
 
-pub fn create_enemies_spawner(commands: &mut Commands, spawn_timer: Timer) {
-    commands.spawn((Spawner {
-        spawn_timer,
-        spawn_prob_weights: vec![
+pub fn initialize_enemies_spawner(mut commands: Commands) {
+    commands.spawn((EnemySpawner {
+        timer: Timer::new(Duration::from_secs(1), true),
+        weights: vec![
             ("small".to_string(), 5),
             ("medium".to_string(), 3),
             ("big".to_string(), 2),

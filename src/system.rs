@@ -1,14 +1,15 @@
+use bevy::{
+    input::{keyboard::KeyCode, Input},
+    prelude::*,
+};
+use rand::prelude::*;
+
 use crate::{
-    component::{Animatable, Enemy, HitBox, Motion, Ship, ShipAnimationState, Spawner},
+    component::{Animation, Enemy, EnemySpawner, HitBox, Motion, Ship, ShipAnimationState},
     constant::{ARENA_HEIGHT, ARENA_WIDTH},
     entity,
     game::GameState,
 };
-use bevy::{
-    input::{keyboard::KeyCode, Input},
-    prelude::{Commands, Entity, Mut, Res, TextureAtlasSprite, Time, Transform, Vec2, Vec3},
-};
-use rand::prelude::*;
 
 // TODO: implement acceleration
 
@@ -45,39 +46,30 @@ pub fn enemies_spawner(
     mut commands: Commands,
     time: Res<Time>,
     game_state: Res<GameState>,
-    mut spawner: Mut<Spawner>,
+    mut spawner: Mut<EnemySpawner>,
 ) {
-    spawner.spawn_timer.tick(time.delta_seconds);
-    if spawner.spawn_timer.just_finished {
+    spawner.timer.tick(time.delta_seconds);
+    if spawner.timer.just_finished {
         let mut rng = rand::thread_rng();
-        let spawnable_name = &spawner
-            .spawn_prob_weights
+        let variant_name = &spawner
+            .weights
             .choose_weighted(&mut rng, |item| item.1)
             .expect("Could not choose spawnable")
             .0;
 
-        // TODO: Find other ways to handle sprite size and scaling for hitbox
-        let texture_atlas = game_state
-            .texture_atlases
-            .get(spawnable_name)
-            .expect("Could not get texture from handle.");
+        if let Some(enemy_data) = game_state.enemy_data.get(variant_name) {
+            let x_offset = (ARENA_WIDTH - enemy_data.hit_box.width) / 2.;
+            let translation_x = -x_offset + rng.gen::<f32>() * (2. * x_offset);
+            let translation_y = (ARENA_HEIGHT + enemy_data.hit_box.height) / 2.;
 
-        let texture_width = texture_atlas.1.x();
-        let texture_height = texture_atlas.1.y();
-
-        let max_offset_x_from_center = ARENA_WIDTH - texture_height;
-        let min_width = -(max_offset_x_from_center) / 2.;
-        let max_width = (max_offset_x_from_center) / 2.;
-
-        let translation_x = min_width + rng.gen::<f32>() * (max_width - min_width);
-        let translation_y = (ARENA_HEIGHT + texture_height) / 2.;
-
-        entity::create_enemy(
-            &mut commands,
-            texture_atlas.0.clone(),
-            Vec2::new(texture_width, texture_height),
-            Vec3::new(translation_x, translation_y, 0.),
-        );
+            entity::create_enemy(
+                &mut commands,
+                enemy_data.texture_atlas_handle.clone(),
+                enemy_data.variant.clone(),
+                enemy_data.hit_box.clone(),
+                Vec3::new(translation_x, translation_y, 0.),
+            );
+        }
     }
 }
 
@@ -205,10 +197,10 @@ pub fn ship_state_transition(
 pub fn entities_animation(
     time: Res<Time>,
     mut sprite: Mut<TextureAtlasSprite>,
-    mut animatable: Mut<Animatable>,
+    mut animation: Mut<Animation>,
 ) {
-    animatable.cycle_timer.tick(time.delta_seconds);
-    if animatable.cycle_timer.finished {
-        sprite.index = (sprite.index + animatable.sprite_idx_delta) % animatable.sprite_count;
+    animation.timer.tick(time.delta_seconds);
+    if animation.timer.finished {
+        sprite.index = (sprite.index + animation.idx_delta) % animation.sprite_count;
     }
 }
