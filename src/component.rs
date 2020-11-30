@@ -28,6 +28,7 @@ pub enum ShipAnimationState {
 /// Component that marks an entity to be a ship in the game
 #[derive(Debug)]
 pub struct Ship {
+    pub move_speed: f32,
     pub animation_state: ShipAnimationState,
     pub transition_duration: Duration,
     pub transition_instant: Instant,
@@ -40,12 +41,8 @@ pub struct EnemySpawner {
     pub weights: Vec<(String, u8)>,
 }
 
-/// Component that determines how entities move within the 2D space
 #[derive(Debug)]
-pub struct Motion {
-    pub max_speed: f32,
-    pub velocity: Vec2,
-}
+pub struct Velocity(pub Vec2);
 
 /// Component that determines when to change the sprite and which sprite index to change to when
 /// doing simple animation

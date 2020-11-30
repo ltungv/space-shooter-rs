@@ -1,5 +1,5 @@
 use crate::{
-    component::{Animation, Enemy, EnemySpawner, HitBox, Motion, Ship, ShipAnimationState},
+    component::{Animation, Enemy, EnemySpawner, HitBox, Ship, ShipAnimationState, Velocity},
     constant::*,
     resource::EnemyData,
 };
@@ -33,6 +33,7 @@ pub fn initialize_ship(
             ..Default::default()
         })
         .with(Ship {
+            move_speed: SHIP_INITIAL_MOVE_SPEED,
             animation_state: ShipAnimationState::Stabilized,
             transition_instant: Instant::now(),
             transition_duration: SHIP_STATE_TRANSITION_DURATION,
@@ -41,10 +42,7 @@ pub fn initialize_ship(
             width: SHIP_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
             height: SHIP_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
         })
-        .with(Motion {
-            max_speed: SHIP_MAX_SPEED,
-            velocity: Vec2::default(),
-        })
+        .with(Velocity(Vec2::default()))
         .with(Animation {
             idx_delta: 5,
             sprite_count: 10,
@@ -71,10 +69,10 @@ pub fn create_enemy(commands: &mut Commands, translation: Vec3, enemy_data: Enem
             width: enemy_data.texture_size.x() * SPRITE_SCALING_FACTOR,
             height: enemy_data.texture_size.y() * SPRITE_SCALING_FACTOR,
         })
-        .with(Motion {
-            max_speed: ENEMY_MAX_SPEED,
-            velocity: Vec2::new(ENEMY_INITIAL_VELOCITY.0, ENEMY_INITIAL_VELOCITY.1),
-        })
+        .with(Velocity(Vec2::new(
+            ENEMY_INITIAL_VELOCITY.0,
+            ENEMY_INITIAL_VELOCITY.1,
+        )))
         .with(Animation {
             idx_delta: 1,
             sprite_count: 2,

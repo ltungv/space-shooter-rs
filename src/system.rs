@@ -5,7 +5,7 @@ use bevy::{
 use rand::prelude::*;
 
 use crate::{
-    component::{Animation, Enemy, EnemySpawner, HitBox, Motion, Ship, ShipAnimationState},
+    component::{Animation, Enemy, EnemySpawner, HitBox, Ship, ShipAnimationState, Velocity},
     constant::{ARENA_HEIGHT, ARENA_WIDTH, SPRITE_SCALING_FACTOR},
     entity,
     resource::GameState,
@@ -20,11 +20,11 @@ pub fn enemies_movement(
     // Resources
     time: Res<Time>,
     _enemy: &Enemy,
-    motion: &Motion,
+    velocity: &Velocity,
     mut transform: Mut<Transform>,
 ) {
-    *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
-    *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
+    *transform.translation.x_mut() += time.delta_seconds * velocity.0.x();
+    *transform.translation.y_mut() += time.delta_seconds * velocity.0.y();
 }
 
 pub fn enemies_despawner(
@@ -83,13 +83,13 @@ pub fn ship_movement(
     // Resources
     time: Res<Time>,
     _ship: &Ship,
-    motion: &Motion,
+    velocity: &Velocity,
     hit_box: &HitBox,
     mut transform: Mut<Transform>,
 ) {
     // X-axis movement
     let max_offset_x_from_center = (ARENA_WIDTH - hit_box.width) / 2.;
-    *transform.translation.x_mut() += time.delta_seconds * motion.velocity.x();
+    *transform.translation.x_mut() += time.delta_seconds * velocity.0.x();
     *transform.translation.x_mut() = transform
         .translation
         .x()
@@ -98,7 +98,7 @@ pub fn ship_movement(
 
     // Y-axis movement
     let max_offset_y_from_center = (ARENA_HEIGHT - hit_box.height) / 2.;
-    *transform.translation.y_mut() += time.delta_seconds * motion.velocity.y();
+    *transform.translation.y_mut() += time.delta_seconds * velocity.0.y();
     *transform.translation.y_mut() = transform
         .translation
         .y()
@@ -107,7 +107,7 @@ pub fn ship_movement(
 }
 
 /// Change ship's directions based on user's keyboard input
-pub fn ship_control(kb_input: Res<Input<KeyCode>>, _ship: &Ship, mut motion: Mut<Motion>) {
+pub fn ship_control(kb_input: Res<Input<KeyCode>>, ship: &Ship, mut velocity: Mut<Velocity>) {
     let mut x_direction = 0.;
     if kb_input.pressed(KeyCode::Left) {
         x_direction -= 1.;
@@ -126,13 +126,25 @@ pub fn ship_control(kb_input: Res<Input<KeyCode>>, _ship: &Ship, mut motion: Mut
 
     // Ensure ship speed is capped at `max_speed` when moving diagonally
     if x_direction != 0. && y_direction != 0. {
-        *motion.velocity.y_mut() = (motion.max_speed / f32::sqrt(2.)) * y_direction;
-        *motion.velocity.x_mut() = (motion.max_speed / f32::sqrt(2.)) * x_direction;
+        *velocity.0.y_mut() = (ship.move_speed / f32::sqrt(2.)) * y_direction;
+        *velocity.0.x_mut() = (ship.move_speed / f32::sqrt(2.)) * x_direction;
     } else {
-        *motion.velocity.y_mut() = motion.max_speed * y_direction;
-        *motion.velocity.x_mut() = motion.max_speed * x_direction;
+        *velocity.0.y_mut() = ship.move_speed * y_direction;
+        *velocity.0.x_mut() = ship.move_speed * x_direction;
     }
 }
+
+// pub fn fire_laser(mut commands: Commands, kb_input: Res<Input<KeyCode>>) {
+//     if kb_input.pressed(KeyCode::Space) {
+//         commands
+//             .spawn(SpriteSheetComponents)
+//             .with(ShipLaser)
+//             .with(HitBox {
+//                 width: SHIP_LASER_SPRITE_WIDTH,
+//                 height: SHIP_LASERT_SPRITE_HEIGHT,
+//             })
+//     }
+// }
 
 /// Change the ship's animation state and change the current index to the index of the sprite
 /// that represents that state. The ship has to be in the new state for at least some set amount
@@ -140,14 +152,14 @@ pub fn ship_control(kb_input: Res<Input<KeyCode>>, _ship: &Ship, mut motion: Mut
 pub fn ship_state_transition(
     time: Res<Time>,
     mut ship: Mut<Ship>,
-    motion: &Motion,
+    velocity: &Velocity,
     mut sprite: Mut<TextureAtlasSprite>,
 ) {
     // State is not changed rapidly so that animation can be perceived by the ship
     if let Some(now) = time.instant {
         if now.duration_since(ship.transition_instant) >= ship.transition_duration {
             // Determines the new state based on previous state and current moving direction
-            let x_velocity = motion.velocity.x();
+            let x_velocity = velocity.0.x();
             let new_animation_state = if x_velocity < 0. {
                 match ship.animation_state {
                     ShipAnimationState::Stabilized => ShipAnimationState::HalfLeft,
