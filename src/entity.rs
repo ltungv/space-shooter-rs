@@ -14,7 +14,6 @@ pub fn initialize_camera(mut commands: Commands) {
     commands.spawn(Camera2dComponents::default());
 }
 
-// TODO: Use spritesheets from resource
 /// Add a new entity to the world with all the needed components to represent a ship
 pub fn initialize_ship(
     mut commands: Commands,
@@ -54,7 +53,6 @@ pub fn initialize_ship(
         });
 }
 
-// TODO: Use spritesheets from resource
 /// Create a new enemy spawner
 pub fn initialize_enemies_spawner(mut commands: Commands) {
     commands.spawn((EnemySpawner {
