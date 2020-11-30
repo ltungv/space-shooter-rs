@@ -1,16 +1,20 @@
 use crate::{
-    component::{Animation, Enemy, EnemySpawner, HitBox, Ship, ShipAnimationState, Velocity},
-    constant::*,
-    resource::EnemyData,
+    component::{Animation, EnemySpawner, HitBox, Ship, ShipAnimationState, Velocity},
+    constant::{
+        ANIMATION_INTERVAL, ENEMY_SPAWN_INTERVAL, SHIP_INITIAL_MOVE_SPEED,
+        SHIP_LASER_COOLDOWN_DURATION, SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH,
+        SHIP_STATE_TRANSITION_DURATION, SPAWN_WEIGHT_ENEMY_BIG, SPAWN_WEIGHT_ENEMY_MEDIUM,
+        SPAWN_WEIGHT_ENEMY_SMALL, SPRITE_SCALING_FACTOR,
+    },
 };
 use bevy::prelude::*;
-use std::time::Instant;
 
 /// Create a camera
 pub fn initialize_camera(mut commands: Commands) {
     commands.spawn(Camera2dComponents::default());
 }
 
+// TODO: Use spritesheets from resource
 /// Add a new entity to the world with all the needed components to represent a ship
 pub fn initialize_ship(
     mut commands: Commands,
@@ -35,8 +39,8 @@ pub fn initialize_ship(
         .with(Ship {
             move_speed: SHIP_INITIAL_MOVE_SPEED,
             animation_state: ShipAnimationState::Stabilized,
-            transition_instant: Instant::now(),
-            transition_duration: SHIP_STATE_TRANSITION_DURATION,
+            laser_cooldown_timer: Timer::new(SHIP_LASER_COOLDOWN_DURATION, false),
+            transition_timer: Timer::new(SHIP_STATE_TRANSITION_DURATION, false),
         })
         .with(HitBox {
             width: SHIP_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
@@ -50,36 +54,7 @@ pub fn initialize_ship(
         });
 }
 
-/// Add a new entity to the world with all the needed components to represent an enemy
-pub fn create_enemy(commands: &mut Commands, translation: Vec3, enemy_data: EnemyData) {
-    commands
-        .spawn(SpriteSheetComponents {
-            texture_atlas: enemy_data.texture_atlas_handle,
-            transform: Transform {
-                scale: Vec3::splat(SPRITE_SCALING_FACTOR),
-                translation,
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .with(Enemy {
-            variant: enemy_data.variant,
-        })
-        .with(HitBox {
-            width: enemy_data.texture_size.x() * SPRITE_SCALING_FACTOR,
-            height: enemy_data.texture_size.y() * SPRITE_SCALING_FACTOR,
-        })
-        .with(Velocity(Vec2::new(
-            ENEMY_INITIAL_VELOCITY.0,
-            ENEMY_INITIAL_VELOCITY.1,
-        )))
-        .with(Animation {
-            idx_delta: 1,
-            sprite_count: 2,
-            timer: Timer::new(ANIMATION_INTERVAL, true),
-        });
-}
-
+// TODO: Use spritesheets from resource
 /// Create a new enemy spawner
 pub fn initialize_enemies_spawner(mut commands: Commands) {
     commands.spawn((EnemySpawner {

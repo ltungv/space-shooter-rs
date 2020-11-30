@@ -1,19 +1,4 @@
 use bevy::prelude::*;
-use std::time::{Duration, Instant};
-
-/// The type of enemy
-#[derive(Debug, PartialEq, Clone)]
-pub enum EnemyVariant {
-    Small,
-    Medium,
-    Big,
-}
-
-/// Component marks an entity to be an enemy
-#[derive(Debug)]
-pub struct Enemy {
-    pub variant: EnemyVariant,
-}
 
 /// Different states of the  when moving left/right
 #[derive(Debug, PartialEq)]
@@ -30,8 +15,22 @@ pub enum ShipAnimationState {
 pub struct Ship {
     pub move_speed: f32,
     pub animation_state: ShipAnimationState,
-    pub transition_duration: Duration,
-    pub transition_instant: Instant,
+    pub laser_cooldown_timer: Timer,
+    pub transition_timer: Timer,
+}
+
+/// The type of enemy
+#[derive(Debug, PartialEq, Clone)]
+pub enum EnemyVariant {
+    Small,
+    Medium,
+    Big,
+}
+
+/// Component marks an entity to be an enemy
+#[derive(Debug)]
+pub struct Enemy {
+    pub variant: EnemyVariant,
 }
 
 /// Component determines the spawn rate and spawn probability of entities
@@ -40,6 +39,9 @@ pub struct EnemySpawner {
     pub timer: Timer,
     pub weights: Vec<(String, u8)>,
 }
+
+#[derive(Debug)]
+pub struct ShipLaser;
 
 #[derive(Debug)]
 pub struct Velocity(pub Vec2);
@@ -59,3 +61,6 @@ pub struct HitBox {
     pub width: f32,
     pub height: f32,
 }
+
+#[derive(Debug)]
+pub struct TimeToLive(pub Timer);

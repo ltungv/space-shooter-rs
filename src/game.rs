@@ -11,16 +11,18 @@ impl Plugin for Game {
     // this is where we set up our plugin
     fn build(&self, app: &mut AppBuilder) {
         app.init_resource::<resource::GameState>()
-            .add_startup_system(resource::initialize_enemy_data.system())
+            .add_startup_system(resource::initialize_texture_atlases.system())
             .add_startup_system(entity::initialize_camera.system())
             .add_startup_system(entity::initialize_ship.system())
             .add_startup_system(entity::initialize_enemies_spawner.system())
-            .add_system(system::ship_control.system())
-            .add_system(system::ship_movement.system())
+            .add_system(system::keyboard_control_ship.system())
+            .add_system(system::keyboard_fire_laser.system())
+            .add_system(system::entities_time_to_live.system())
+            .add_system(system::entities_movement.system())
+            .add_system(system::entities_animation.system())
+            .add_system(system::ship_translation_clip.system())
             .add_system(system::ship_state_transition.system())
             .add_system(system::enemies_spawner.system())
-            .add_system(system::enemies_movement.system())
-            .add_system(system::enemies_despawner.system())
-            .add_system(system::entities_animation.system());
+            .add_system(system::enemies_despawner.system());
     }
 }
