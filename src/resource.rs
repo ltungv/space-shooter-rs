@@ -1,8 +1,7 @@
 use crate::constant::{
     ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT,
     ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
-    EXPLOSION_SPRITE_HEIGHT, EXPLOSION_SPRITE_WIDTH, LASER_BOLT_SPRITE_HEIGHT,
-    LASER_BOLT_SPRITE_WIDTH,
+    EXPLOSION_SPRITE_HEIGHT, EXPLOSION_SPRITE_WIDTH,
 };
 use bevy::prelude::*;
 use std::collections::HashMap;
@@ -18,15 +17,33 @@ pub fn initialize_texture_atlases(
     mut game_state: ResMut<GameState>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    // LASER BOLTS SPRITESHEET
-    let mut texture_atlas = TextureAtlas::from_grid(
+    // LASER SPRITESHEET
+    let mut texture_atlas = TextureAtlas::new_empty(
         asset_server.load("spritesheets/laser-bolts.png"),
-        Vec2::new(LASER_BOLT_SPRITE_WIDTH, LASER_BOLT_SPRITE_HEIGHT),
-        2,
-        2,
+        Vec2::new(32., 32.),
     );
+    // enemy_laser_01
+    texture_atlas.add_texture(bevy::sprite::Rect {
+        min: Vec2::new(6., 7.),
+        max: Vec2::new(11., 12.),
+    });
+    // ship_laser_01
+    texture_atlas.add_texture(bevy::sprite::Rect {
+        min: Vec2::new(6., 18.),
+        max: Vec2::new(11., 30.),
+    });
+    // enemy_laser_02
+    texture_atlas.add_texture(bevy::sprite::Rect {
+        min: Vec2::new(20., 7.),
+        max: Vec2::new(25., 12.),
+    });
+    // ship_laser_02
+    texture_atlas.add_texture(bevy::sprite::Rect {
+        min: Vec2::new(20., 18.),
+        max: Vec2::new(25., 31.),
+    });
+
     // Texture is row-major order, swap to turn into column-major order
-    texture_atlas.textures.swap(1, 2);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     game_state
         .texture_atlas_handles

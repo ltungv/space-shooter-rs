@@ -4,7 +4,7 @@ pub const ARENA_WIDTH: f32 = 480.;
 pub const ARENA_HEIGHT: f32 = 640.;
 
 pub const ANIMATION_INTERVAL: Duration = Duration::from_millis(200);
-pub const SPRITE_SCALING_FACTOR: f32 = 2.;
+pub const SPRITE_SCALING_FACTOR: f32 = 3.;
 
 pub const SPAWN_WEIGHT_ENEMY_SMALL: u8 = 6;
 pub const SPAWN_WEIGHT_ENEMY_MEDIUM: u8 = 3;
@@ -30,9 +30,9 @@ pub const ENEMY_MEDIUM_SPRITE_HEIGHT: f32 = 16.;
 pub const ENEMY_SMALL_SPRITE_WIDTH: f32 = 16.;
 pub const ENEMY_SMALL_SPRITE_HEIGHT: f32 = 16.;
 
-// TODO: update bounds
-pub const LASER_BOLT_SPRITE_WIDTH: f32 = 16.;
-pub const LASER_BOLT_SPRITE_HEIGHT: f32 = 16.;
+pub const LASER_SPRITE_WIDTH: f32 = 5.;
+pub const SHIP_LASER_SPRITE_HEIGHT: f32 = 13.;
+pub const ENEMY_LASER_SPRITE_HEIGHT: f32 = 5.;
 
 pub const EXPLOSION_SPRITE_WIDTH: f32 = 16.;
 pub const EXPLOSION_SPRITE_HEIGHT: f32 = 16.;

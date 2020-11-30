@@ -7,7 +7,7 @@ use crate::{
         ANIMATION_INTERVAL, ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT,
         ENEMY_BIG_SPRITE_WIDTH, ENEMY_INITIAL_VELOCITY, ENEMY_MEDIUM_SPRITE_HEIGHT,
         ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
-        LASER_BOLT_SPRITE_HEIGHT, LASER_BOLT_SPRITE_WIDTH, SHIP_LASER_INITIAL_VELOCITY,
+        LASER_SPRITE_WIDTH, SHIP_LASER_INITIAL_VELOCITY, SHIP_LASER_SPRITE_HEIGHT,
         SHIP_LASER_TIME_TO_LIVE_DURATION, SPRITE_SCALING_FACTOR,
     },
     resource::GameState,
@@ -104,7 +104,7 @@ pub fn enemies_spawner(
                     .get("enemy-big")
                     .expect("Could not get big enemy texture atlas handle");
 
-                Some((EnemyVariant::Small, hit_box, texture_atlas_handle))
+                Some((EnemyVariant::Big, hit_box, texture_atlas_handle))
             }
             _ => panic!("Unknown enemy type name"),
         };
@@ -227,8 +227,8 @@ pub fn keyboard_fire_laser(
                     false,
                 )))
                 .with(HitBox {
-                    width: LASER_BOLT_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                    height: LASER_BOLT_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
+                    width: LASER_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+                    height: SHIP_LASER_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
                 })
                 .with(Velocity(Vec2::new(
                     SHIP_LASER_INITIAL_VELOCITY.0,
