@@ -1,14 +1,11 @@
-use crate::{
-    component::{EnemyVariant, HitBox},
-    constant::*,
-};
+use crate::{component::EnemyVariant, constant::*};
 use bevy::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct EnemyData {
     pub variant: EnemyVariant,
-    pub hit_box: HitBox,
+    pub texture_size: Vec2,
     pub texture_atlas_handle: Handle<TextureAtlas>,
 }
 
@@ -31,10 +28,7 @@ pub fn initialize_enemy_data(
         "small".to_string(),
         EnemyData {
             variant: EnemyVariant::Small,
-            hit_box: HitBox {
-                width: texture_size.x(),
-                height: texture_size.y(),
-            },
+            texture_size,
             texture_atlas_handle: texture_atlases.add(texture_atlas),
         },
     );
@@ -46,10 +40,7 @@ pub fn initialize_enemy_data(
         "medium".to_string(),
         EnemyData {
             variant: EnemyVariant::Medium,
-            hit_box: HitBox {
-                width: texture_size.x(),
-                height: texture_size.y(),
-            },
+            texture_size,
             texture_atlas_handle: texture_atlases.add(texture_atlas),
         },
     );
@@ -61,10 +52,7 @@ pub fn initialize_enemy_data(
         "big".to_string(),
         EnemyData {
             variant: EnemyVariant::Big,
-            hit_box: HitBox {
-                width: texture_size.x(),
-                height: texture_size.y(),
-            },
+            texture_size,
             texture_atlas_handle: texture_atlases.add(texture_atlas),
         },
     );

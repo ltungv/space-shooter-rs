@@ -24,4 +24,3 @@ impl Plugin for Game {
             .add_system(system::entities_animation.system());
     }
 }
-

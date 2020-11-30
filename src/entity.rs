@@ -28,6 +28,7 @@ pub fn initialize_ship(
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
+            transform: Transform::from_scale(Vec3::splat(SPRITE_SCALING_FACTOR)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -37,8 +38,8 @@ pub fn initialize_ship(
             transition_duration: SHIP_STATE_TRANSITION_DURATION,
         })
         .with(HitBox {
-            width: SHIP_SPRITE_WIDTH,
-            height: SHIP_SPRITE_HEIGHT,
+            width: SHIP_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+            height: SHIP_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
         })
         .with(Motion {
             max_speed: SHIP_MAX_SPEED,
@@ -57,6 +58,7 @@ pub fn create_enemy(commands: &mut Commands, translation: Vec3, enemy_data: Enem
         .spawn(SpriteSheetComponents {
             texture_atlas: enemy_data.texture_atlas_handle,
             transform: Transform {
+                scale: Vec3::splat(SPRITE_SCALING_FACTOR),
                 translation,
                 ..Default::default()
             },
@@ -65,7 +67,10 @@ pub fn create_enemy(commands: &mut Commands, translation: Vec3, enemy_data: Enem
         .with(Enemy {
             variant: enemy_data.variant,
         })
-        .with(enemy_data.hit_box)
+        .with(HitBox {
+            width: enemy_data.texture_size.x() * SPRITE_SCALING_FACTOR,
+            height: enemy_data.texture_size.y() * SPRITE_SCALING_FACTOR,
+        })
         .with(Motion {
             max_speed: ENEMY_MAX_SPEED,
             velocity: Vec2::new(ENEMY_INITIAL_VELOCITY.0, ENEMY_INITIAL_VELOCITY.1),

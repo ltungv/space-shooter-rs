@@ -6,7 +6,7 @@ use rand::prelude::*;
 
 use crate::{
     component::{Animation, Enemy, EnemySpawner, HitBox, Motion, Ship, ShipAnimationState},
-    constant::{ARENA_HEIGHT, ARENA_WIDTH},
+    constant::{ARENA_HEIGHT, ARENA_WIDTH, SPRITE_SCALING_FACTOR},
     entity,
     resource::GameState,
 };
@@ -62,9 +62,10 @@ pub fn enemies_spawner(
 
         if let Some(enemy_data) = game_state.enemy_data.get(variant_name) {
             // Enemy comes from the top of the screen with random x-axis position
-            let x_offset = (ARENA_WIDTH - enemy_data.hit_box.width) / 2.;
+            let scaled_texture_size = enemy_data.texture_size * SPRITE_SCALING_FACTOR;
+            let x_offset = (ARENA_WIDTH - scaled_texture_size.x()) / 2.;
             let translation_x = -x_offset + rng.gen::<f32>() * (2. * x_offset);
-            let translation_y = (ARENA_HEIGHT + enemy_data.hit_box.height) / 2.;
+            let translation_y = (ARENA_HEIGHT + scaled_texture_size.y()) / 2.;
 
             entity::create_enemy(
                 &mut commands,
