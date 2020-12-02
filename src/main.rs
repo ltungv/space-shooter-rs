@@ -3,7 +3,7 @@ mod constant;
 mod entity;
 mod game;
 mod resource;
-mod system;
+mod systems;
 
 use bevy::prelude::{App, DefaultPlugins, WindowDescriptor};
 use constant::{ARENA_HEIGHT, ARENA_WIDTH};
