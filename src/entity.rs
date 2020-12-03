@@ -32,6 +32,7 @@ pub fn initialize_ship(
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
             transform: Transform::from_scale(Vec3::splat(SPRITE_SCALING_FACTOR)),
+            // global_transform: GlobalTransform::from_scale(Vec3::splat(SPRITE_SCALING_FACTOR)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -41,10 +42,10 @@ pub fn initialize_ship(
             laser_cooldown_timer: Timer::new(SHIP_LASER_COOLDOWN_DURATION, false),
             transition_timer: Timer::new(SHIP_STATE_TRANSITION_DURATION, false),
         })
-        .with(HitBox {
-            width: SHIP_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-            height: SHIP_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-        })
+        .with(HitBox(Vec2::new(
+            SHIP_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+            SHIP_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
+        )))
         .with(Velocity(Vec2::default()))
         .with(Animation {
             idx_delta: 5,

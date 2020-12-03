@@ -4,6 +4,7 @@ mod entity;
 mod game;
 mod resource;
 mod systems;
+mod event;
 
 use bevy::prelude::{App, DefaultPlugins, WindowDescriptor};
 use constant::{ARENA_HEIGHT, ARENA_WIDTH};

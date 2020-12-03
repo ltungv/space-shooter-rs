@@ -14,9 +14,13 @@ use bevy::{
 
 /// Change ship's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
-pub fn ship_translation_clip(_ship: &Ship, hit_box: &HitBox, mut transform: Mut<Transform>) {
+pub fn ship_translation_clip(
+    _ship: &Ship,
+    HitBox(hit_box): &HitBox,
+    mut transform: Mut<Transform>,
+) {
     // X-axis movement
-    let max_offset_x_from_center = (ARENA_WIDTH - hit_box.width) / 2.;
+    let max_offset_x_from_center = (ARENA_WIDTH - hit_box.x()) / 2.;
     *transform.translation.x_mut() = transform
         .translation
         .x()
@@ -24,7 +28,7 @@ pub fn ship_translation_clip(_ship: &Ship, hit_box: &HitBox, mut transform: Mut<
         .max(-max_offset_x_from_center);
 
     // Y-axis movement
-    let max_offset_y_from_center = (ARENA_HEIGHT - hit_box.height) / 2.;
+    let max_offset_y_from_center = (ARENA_HEIGHT - hit_box.y()) / 2.;
     *transform.translation.y_mut() = transform
         .translation
         .y()
@@ -70,14 +74,14 @@ pub fn keyboard_fire_laser(
     kb_input: Res<Input<KeyCode>>,
     game_state: Res<GameState>,
     transform: &Transform,
-    hit_box: &HitBox,
+    HitBox(hit_box): &HitBox,
     mut ship: Mut<Ship>,
 ) {
     ship.laser_cooldown_timer.tick(time.delta_seconds);
     if kb_input.pressed(KeyCode::Space) && ship.laser_cooldown_timer.finished {
         ship.laser_cooldown_timer.reset();
         if let Some(texture_atlas_handle) = game_state.texture_atlas_handles.get("laser-bolts") {
-            let translation = transform.translation + hit_box.height * Vec3::unit_y();
+            let translation = transform.translation + hit_box.x() * Vec3::unit_y();
             commands
                 .spawn(SpriteSheetComponents {
                     texture_atlas: texture_atlas_handle.clone(),
@@ -94,10 +98,10 @@ pub fn keyboard_fire_laser(
                     SHIP_LASER_TIME_TO_LIVE_DURATION,
                     false,
                 )))
-                .with(HitBox {
-                    width: LASER_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                    height: SHIP_LASER_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-                })
+                .with(HitBox(Vec2::new(
+                    LASER_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+                    SHIP_LASER_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
+                )))
                 .with(Velocity(Vec2::new(
                     SHIP_LASER_INITIAL_VELOCITY.0,
                     SHIP_LASER_INITIAL_VELOCITY.1,

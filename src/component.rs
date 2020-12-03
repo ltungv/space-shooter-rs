@@ -56,11 +56,8 @@ pub struct Animation {
 }
 
 /// Component that determines the smallest possible box that includes rendered the entity.
-#[derive(Debug, Clone)]
-pub struct HitBox {
-    pub width: f32,
-    pub height: f32,
-}
+#[derive(Debug)]
+pub struct HitBox(pub Vec2);
 
 #[derive(Debug)]
 pub struct TimeToLive(pub Timer);

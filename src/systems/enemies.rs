@@ -6,23 +6,24 @@ use crate::{
         ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
         SPRITE_SCALING_FACTOR,
     },
+    event::EntityDespawnEvent,
     resource::GameState,
 };
 use bevy::prelude::*;
 use rand::prelude::*;
 
 pub fn enemies_despawner(
-    mut commands: Commands,
+    mut entity_despawn_events: ResMut<Events<EntityDespawnEvent>>,
     entity: Entity,
     _enemy: &Enemy,
-    hit_box: &HitBox,
+    HitBox(hit_box): &HitBox,
     transform: Mut<Transform>,
 ) {
-    if transform.translation.y() + hit_box.height / 2. <= -ARENA_HEIGHT / 2.
-        || transform.translation.x() + hit_box.width / 2. <= -ARENA_WIDTH / 2.
-        || transform.translation.x() - hit_box.width / 2. >= ARENA_WIDTH / 2.
+    if transform.translation.y() + hit_box.y() / 2. <= -ARENA_HEIGHT / 2.
+        || transform.translation.x() + hit_box.x() / 2. <= -ARENA_WIDTH / 2.
+        || transform.translation.x() - hit_box.x() / 2. >= ARENA_WIDTH / 2.
     {
-        commands.despawn(entity);
+        entity_despawn_events.send(EntityDespawnEvent { entity });
     }
 }
 
@@ -46,10 +47,10 @@ pub fn enemies_spawner(
 
         let enemy_data = match variant_name.as_str() {
             "small" => {
-                let hit_box = HitBox {
-                    width: ENEMY_SMALL_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                    height: ENEMY_SMALL_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-                };
+                let hit_box = HitBox(Vec2::new(
+                    ENEMY_SMALL_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+                    ENEMY_SMALL_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
+                ));
 
                 let texture_atlas_handle = game_state
                     .texture_atlas_handles
@@ -59,10 +60,10 @@ pub fn enemies_spawner(
                 Some((EnemyVariant::Small, hit_box, texture_atlas_handle))
             }
             "medium" => {
-                let hit_box = HitBox {
-                    width: ENEMY_MEDIUM_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                    height: ENEMY_MEDIUM_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-                };
+                let hit_box = HitBox(Vec2::new(
+                    ENEMY_MEDIUM_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+                    ENEMY_MEDIUM_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
+                ));
 
                 let texture_atlas_handle = game_state
                     .texture_atlas_handles
@@ -72,10 +73,10 @@ pub fn enemies_spawner(
                 Some((EnemyVariant::Medium, hit_box, texture_atlas_handle))
             }
             "big" => {
-                let hit_box = HitBox {
-                    width: ENEMY_BIG_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                    height: ENEMY_BIG_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-                };
+                let hit_box = HitBox(Vec2::new(
+                    ENEMY_BIG_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
+                    ENEMY_BIG_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
+                ));
 
                 let texture_atlas_handle = game_state
                     .texture_atlas_handles
@@ -87,13 +88,13 @@ pub fn enemies_spawner(
             _ => panic!("Unknown enemy type name"),
         };
 
-        if let Some((variant, hit_box, texture_atlas_handle)) = enemy_data {
+        if let Some((variant, HitBox(hit_box), texture_atlas_handle)) = enemy_data {
             // Enemy comes from the top of the screen with random x-axis position
-            let max_offset_x_from_center = (ARENA_WIDTH - hit_box.width) / 2.;
+            let max_offset_x_from_center = (ARENA_WIDTH - hit_box.x()) / 2.;
             let rand_translation_x_range = rng.gen::<f32>() * 2. * max_offset_x_from_center;
 
             let translation_x = -max_offset_x_from_center + rand_translation_x_range;
-            let translation_y = (ARENA_HEIGHT + hit_box.height) / 2.;
+            let translation_y = (ARENA_HEIGHT + hit_box.y()) / 2.;
             let translation = Vec3::new(translation_x, translation_y, 0.);
 
             commands
@@ -107,7 +108,7 @@ pub fn enemies_spawner(
                     ..Default::default()
                 })
                 .with(Enemy { variant })
-                .with(hit_box)
+                .with(HitBox(hit_box))
                 .with(Velocity(Vec2::new(
                     ENEMY_INITIAL_VELOCITY.0,
                     ENEMY_INITIAL_VELOCITY.1,
