@@ -14,16 +14,16 @@ impl Plugin for Game {
             .add_startup_system(entity::initialize_camera.system())
             .add_startup_system(entity::initialize_ship.system())
             .add_startup_system(entity::initialize_enemies_spawner.system())
-            .add_system(systems::keyboard_control_ship.system())
-            .add_system(systems::keyboard_fire_laser.system())
-            .add_system(systems::entities_despawn_events_listener.system())
-            .add_system(systems::entities_time_to_live.system())
-            .add_system(systems::entities_movement.system())
-            .add_system(systems::entities_animation.system())
-            .add_system(systems::ship_translation_clip.system())
-            .add_system(systems::ship_state_transition.system())
-            .add_system(systems::enemies_spawner.system())
-            .add_system(systems::enemies_despawner.system())
-            .add_system(systems::collide_laser_enemies.system());
+            .add_system(systems::input::keyboard_control_ship.system())
+            .add_system(systems::input::keyboard_fire_ship_laser.system())
+            .add_system(systems::enemies::check_enemies_spawner.system())
+            .add_system(systems::ship::state_transition.system())
+            .add_system(systems::ship::limit_ship_translation.system())
+            .add_system(systems::motion::apply_velocity_to_translation.system())
+            .add_system(systems::collide::laser_collides_enemy.system())
+            .add_system(systems::animation::texture_atlas_cycle_animation.system())
+            .add_system(systems::despawn::despawn_enemy_out_of_bound.system())
+            .add_system(systems::despawn::despawn_expired_time_to_live.system())
+            .add_system(systems::despawn::despawn_events_listener.system());
     }
 }

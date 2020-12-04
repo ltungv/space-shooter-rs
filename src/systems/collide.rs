@@ -2,7 +2,7 @@ use crate::component::{Enemy, HitBox, ShipLaser};
 use crate::event::EntityDespawnEvent;
 use bevy::prelude::*;
 
-pub fn collide_laser_enemies(
+pub fn laser_collides_enemy(
     mut entity_despawn_events: ResMut<Events<EntityDespawnEvent>>,
     ship_lasers_query: Query<(Entity, &ShipLaser, &HitBox, &Transform)>,
     enemies_query: Query<(Entity, &Enemy, &HitBox, &Transform)>,

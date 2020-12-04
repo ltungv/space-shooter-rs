@@ -6,30 +6,14 @@ use crate::{
         ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
         SPRITE_SCALING_FACTOR,
     },
-    event::EntityDespawnEvent,
     resource::GameState,
 };
 use bevy::prelude::*;
 use rand::prelude::*;
 
-pub fn enemies_despawner(
-    mut entity_despawn_events: ResMut<Events<EntityDespawnEvent>>,
-    entity: Entity,
-    _enemy: &Enemy,
-    HitBox(hit_box): &HitBox,
-    transform: Mut<Transform>,
-) {
-    if transform.translation.y() + hit_box.y() / 2. <= -ARENA_HEIGHT / 2.
-        || transform.translation.x() + hit_box.x() / 2. <= -ARENA_WIDTH / 2.
-        || transform.translation.x() - hit_box.x() / 2. >= ARENA_WIDTH / 2.
-    {
-        entity_despawn_events.send(EntityDespawnEvent { entity });
-    }
-}
-
 /// Go through all enemy spawners and check if they ready to spawn new entity,
 /// create entity as the spawn timer finishes.
-pub fn enemies_spawner(
+pub fn check_enemies_spawner(
     mut commands: Commands,
     time: Res<Time>,
     game_state: Res<GameState>,
