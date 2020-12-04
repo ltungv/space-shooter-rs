@@ -1,4 +1,4 @@
-use crate::component::Velocity;
+use crate::components::Velocity;
 use bevy::prelude::*;
 
 // TODO: implement acceleration

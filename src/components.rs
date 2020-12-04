@@ -14,7 +14,6 @@ pub enum ShipAnimationState {
 #[derive(Debug)]
 pub struct Ship {
     pub move_speed: f32,
-    pub animation_state: ShipAnimationState,
     pub laser_cooldown_timer: Timer,
     pub transition_timer: Timer,
 }
@@ -29,15 +28,13 @@ pub enum EnemyVariant {
 
 /// Component marks an entity to be an enemy
 #[derive(Debug)]
-pub struct Enemy {
-    pub variant: EnemyVariant,
-}
+pub struct Enemy;
 
 /// Component determines the spawn rate and spawn probability of entities
 #[derive(Debug)]
 pub struct EnemySpawner {
     pub timer: Timer,
-    pub weights: Vec<(String, u8)>,
+    pub weights: Vec<(EnemyVariant, u8)>,
 }
 
 #[derive(Debug)]

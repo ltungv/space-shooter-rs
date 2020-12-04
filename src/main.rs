@@ -1,10 +1,10 @@
-mod component;
+mod components;
 mod constant;
 mod entity;
+mod event;
 mod game;
 mod resource;
 mod systems;
-mod event;
 
 use bevy::prelude::{App, DefaultPlugins, WindowDescriptor};
 use constant::{ARENA_HEIGHT, ARENA_WIDTH};

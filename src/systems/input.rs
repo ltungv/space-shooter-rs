@@ -1,9 +1,6 @@
 use crate::{
-    component::{Animation, HitBox, Ship, ShipLaser, TimeToLive, Velocity},
-    constant::{
-        ANIMATION_INTERVAL, LASER_SPRITE_WIDTH, SHIP_LASER_INITIAL_VELOCITY,
-        SHIP_LASER_SPRITE_HEIGHT, SHIP_LASER_TIME_TO_LIVE_DURATION, SPRITE_SCALING_FACTOR,
-    },
+    components::{HitBox, Ship, Velocity},
+    entity,
     resource::GameState,
 };
 use bevy::{
@@ -44,7 +41,7 @@ pub fn keyboard_control_ship(
 }
 
 pub fn keyboard_fire_ship_laser(
-    mut commands: Commands,
+    commands: Commands,
     time: Res<Time>,
     kb_input: Res<Input<KeyCode>>,
     game_state: Res<GameState>,
@@ -55,37 +52,7 @@ pub fn keyboard_fire_ship_laser(
     ship.laser_cooldown_timer.tick(time.delta_seconds);
     if kb_input.pressed(KeyCode::Space) && ship.laser_cooldown_timer.finished {
         ship.laser_cooldown_timer.reset();
-        if let Some(texture_atlas_handle) = game_state.texture_atlas_handles.get("laser-bolts") {
-            let translation = transform.translation + hit_box.x() * Vec3::unit_y();
-            commands
-                .spawn(SpriteSheetComponents {
-                    texture_atlas: texture_atlas_handle.clone(),
-                    transform: Transform {
-                        translation,
-                        scale: Vec3::splat(SPRITE_SCALING_FACTOR),
-                        ..Default::default()
-                    },
-                    sprite: TextureAtlasSprite::new(1),
-                    ..Default::default()
-                })
-                .with(ShipLaser)
-                .with(TimeToLive(Timer::new(
-                    SHIP_LASER_TIME_TO_LIVE_DURATION,
-                    false,
-                )))
-                .with(HitBox(Vec2::new(
-                    LASER_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                    SHIP_LASER_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-                )))
-                .with(Velocity(Vec2::new(
-                    SHIP_LASER_INITIAL_VELOCITY.0,
-                    SHIP_LASER_INITIAL_VELOCITY.1,
-                )))
-                .with(Animation {
-                    idx_delta: 2,
-                    sprite_count: 4,
-                    timer: Timer::new(ANIMATION_INTERVAL, true),
-                });
-        }
+        let laser_translation = transform.translation + hit_box.x() * Vec3::unit_y();
+        entity::spawn_ship_laser(commands, game_state, laser_translation);
     }
 }

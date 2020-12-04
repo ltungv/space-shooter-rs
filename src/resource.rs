@@ -1,8 +1,8 @@
 use crate::{
     constant::{
-    ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT,
-    ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
-    EXPLOSION_SPRITE_HEIGHT, EXPLOSION_SPRITE_WIDTH,
+        ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT,
+        ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
+        EXPLOSION_SPRITE_HEIGHT, EXPLOSION_SPRITE_WIDTH,
     },
     event::EntityDespawnEvent,
 };
@@ -13,7 +13,7 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct GameState {
     pub texture_atlas_handles: HashMap<String, Handle<TextureAtlas>>,
-    pub despawn_event_reader: EventReader<EntityDespawnEvent>,
+    pub entity_despawn_event_reader: EventReader<EntityDespawnEvent>,
 }
 
 pub fn initialize_texture_atlases(

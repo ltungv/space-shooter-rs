@@ -8,16 +8,16 @@ pub struct Game;
 impl Plugin for Game {
     // this is where we set up our plugin
     fn build(&self, app: &mut AppBuilder) {
-        app.init_resource::<resource::GameState>()
-            .add_event::<event::EntityDespawnEvent>()
+        app.add_event::<event::EntityDespawnEvent>()
+            .add_resource(resource::GameState::default())
             .add_startup_system(resource::initialize_texture_atlases.system())
             .add_startup_system(entity::initialize_camera.system())
             .add_startup_system(entity::initialize_ship.system())
-            .add_startup_system(entity::initialize_enemies_spawner.system())
+            .add_startup_system(entity::initialize_enemy_spawner.system())
+            .add_system(systems::spawn::enemy_spawner_trigger.system())
             .add_system(systems::input::keyboard_control_ship.system())
             .add_system(systems::input::keyboard_fire_ship_laser.system())
-            .add_system(systems::enemies::check_enemies_spawner.system())
-            .add_system(systems::ship::state_transition.system())
+            .add_system(systems::ship::ship_animation_state_transition.system())
             .add_system(systems::ship::limit_ship_translation.system())
             .add_system(systems::motion::apply_velocity_to_translation.system())
             .add_system(systems::collide::laser_collides_enemy.system())

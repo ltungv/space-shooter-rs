@@ -1,4 +1,4 @@
-use crate::component::{Enemy, HitBox, ShipLaser};
+use crate::components::{Enemy, HitBox, ShipLaser};
 use crate::event::EntityDespawnEvent;
 use bevy::prelude::*;
 

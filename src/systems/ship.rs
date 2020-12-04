@@ -1,5 +1,5 @@
 use crate::{
-    component::{HitBox, Ship, ShipAnimationState, Velocity},
+    components::{HitBox, Ship, ShipAnimationState, Velocity},
     constant::{ARENA_HEIGHT, ARENA_WIDTH},
 };
 use bevy::prelude::*;
@@ -31,17 +31,18 @@ pub fn limit_ship_translation(
 /// Change the ship's animation state and change the current index to the index of the sprite
 /// that represents that state. The ship has to be in the new state for at least some set amount
 /// of duration before being able to change its state again
-pub fn state_transition(
+pub fn ship_animation_state_transition(
     time: Res<Time>,
     velocity: &Velocity,
     mut ship: Mut<Ship>,
+    mut ship_animation_state: Mut<ShipAnimationState>,
     mut sprite: Mut<TextureAtlasSprite>,
 ) {
     ship.transition_timer.tick(time.delta_seconds);
     if ship.transition_timer.finished {
         let x_velocity = velocity.0.x();
         let new_animation_state = if x_velocity < 0. {
-            match ship.animation_state {
+            match *ship_animation_state {
                 ShipAnimationState::Stabilized => ShipAnimationState::HalfLeft,
                 ShipAnimationState::HalfRight => ShipAnimationState::Stabilized,
                 ShipAnimationState::FullRight => ShipAnimationState::HalfRight,
@@ -50,7 +51,7 @@ pub fn state_transition(
                 }
             }
         } else if x_velocity > 0. {
-            match ship.animation_state {
+            match *ship_animation_state {
                 ShipAnimationState::Stabilized => ShipAnimationState::HalfRight,
                 ShipAnimationState::HalfLeft => ShipAnimationState::Stabilized,
                 ShipAnimationState::FullLeft => ShipAnimationState::HalfLeft,
@@ -59,7 +60,7 @@ pub fn state_transition(
                 }
             }
         } else {
-            match ship.animation_state {
+            match *ship_animation_state {
                 ShipAnimationState::FullLeft => ShipAnimationState::HalfLeft,
                 ShipAnimationState::FullRight => ShipAnimationState::HalfRight,
                 ShipAnimationState::Stabilized
@@ -69,10 +70,10 @@ pub fn state_transition(
         };
 
         // Updates if state is changed
-        if new_animation_state != ship.animation_state {
+        if new_animation_state != *ship_animation_state {
             ship.transition_timer.reset();
-            ship.animation_state = new_animation_state;
-            sprite.index = match ship.animation_state {
+            *ship_animation_state = new_animation_state;
+            sprite.index = match *ship_animation_state {
                 ShipAnimationState::FullLeft => 0,
                 ShipAnimationState::HalfLeft => 1,
                 ShipAnimationState::Stabilized => 2,

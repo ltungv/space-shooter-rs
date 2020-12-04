@@ -1,4 +1,4 @@
-use crate::component::Animation;
+use crate::components::Animation;
 use bevy::prelude::*;
 
 /// Periodically change the index to the sprite in the spritesheet
