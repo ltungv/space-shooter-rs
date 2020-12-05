@@ -3,7 +3,6 @@ use crate::{
     constant::{
         ANIMATION_INTERVAL, SHIP_INITIAL_MOVE_SPEED, SHIP_LASER_COOLDOWN_DURATION,
         SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH, SHIP_STATE_TRANSITION_DURATION,
-        SPRITE_SCALING_FACTOR,
     },
 };
 use bevy::prelude::*;
@@ -34,8 +33,6 @@ pub fn initialize_ship(
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(SPRITE_SCALING_FACTOR)),
-            // global_transform: GlobalTransform::from_scale(Vec3::splat(SPRITE_SCALING_FACTOR)),
             sprite: TextureAtlasSprite::new(2),
             ..Default::default()
         })
@@ -46,10 +43,7 @@ pub fn initialize_ship(
                 transition_timer: Timer::new(SHIP_STATE_TRANSITION_DURATION, false),
             },
             ship_animation_state: ShipAnimationState::Stabilized,
-            hit_box: HitBox(Vec2::new(
-                SHIP_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                SHIP_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            )),
+            hit_box: HitBox(Vec2::new(SHIP_SPRITE_WIDTH, SHIP_SPRITE_HEIGHT)),
             velocity: Velocity(Vec2::default()),
             animation: Animation {
                 idx_delta: 5,

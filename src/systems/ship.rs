@@ -6,7 +6,7 @@ use bevy::prelude::*;
 
 /// Change ship's position based on the moving speed and moving direction. Movement is limited
 /// to the window viewable area
-pub fn limit_ship_translation(
+pub fn limit_translation(
     _ship: &Ship,
     HitBox(hit_box): &HitBox,
     mut transform: Mut<Transform>,
@@ -31,7 +31,7 @@ pub fn limit_ship_translation(
 /// Change the ship's animation state and change the current index to the index of the sprite
 /// that represents that state. The ship has to be in the new state for at least some set amount
 /// of duration before being able to change its state again
-pub fn ship_animation_state_transition(
+pub fn animation_state_transition(
     time: Res<Time>,
     velocity: &Velocity,
     mut ship: Mut<Ship>,

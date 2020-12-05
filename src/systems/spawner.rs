@@ -3,7 +3,7 @@ use crate::{
     constant::{
         ARENA_HEIGHT, ARENA_WIDTH, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
         ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
-        ENEMY_SMALL_SPRITE_WIDTH, SPRITE_SCALING_FACTOR,
+        ENEMY_SMALL_SPRITE_WIDTH,
     },
     entity,
     resource::GameState,
@@ -13,7 +13,7 @@ use rand::prelude::*;
 
 /// Go through all enemy spawners and check if they ready to spawn new entity,
 /// create entity as the spawn timer finishes.
-pub fn enemy_spawner_trigger(
+pub fn trigger_enemy_spawn(
     commands: Commands,
     time: Res<Time>,
     game_state: Res<GameState>,
@@ -31,27 +31,19 @@ pub fn enemy_spawner_trigger(
             .clone();
 
         let (enemy_width, enemy_height) = match enemy_variant {
-            EnemyVariant::Small => (
-                ENEMY_SMALL_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                ENEMY_SMALL_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            ),
-            EnemyVariant::Medium => (
-                ENEMY_MEDIUM_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                ENEMY_MEDIUM_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            ),
-            EnemyVariant::Big => (
-                ENEMY_BIG_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                ENEMY_BIG_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            ),
+            EnemyVariant::Small => (ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
+            EnemyVariant::Medium => (ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT),
+            EnemyVariant::Big => (ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT),
         };
 
         // Enemy comes from the top of the screen with random x-axis position
-        let max_offset_x_from_center = (ARENA_WIDTH - enemy_width) / 2.;
-        let rand_translation_x_range = rng.gen::<f32>() * 2. * max_offset_x_from_center;
-
-        let translation_x = -max_offset_x_from_center + rand_translation_x_range;
-        let translation_y = (ARENA_HEIGHT + enemy_height) / 2.;
-        let translation = Vec3::new(translation_x, translation_y, 0.);
+        let translation_x_range = ARENA_WIDTH - enemy_width;
+        let translation_x_min = -translation_x_range / 2.;
+        let translation = Vec3::new(
+            translation_x_min + rng.gen::<f32>() * translation_x_range,
+            (ARENA_HEIGHT + enemy_height) / 2.,
+            0.,
+        );
 
         entity::spawn_enemy(commands, game_state, enemy_variant, translation);
     }

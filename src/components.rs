@@ -52,6 +52,9 @@ pub struct Animation {
     pub timer: Timer,
 }
 
+#[derive(Debug)]
+pub struct Explosion;
+
 /// Component that determines the smallest possible box that includes rendered the entity.
 #[derive(Debug)]
 pub struct HitBox(pub Vec2);

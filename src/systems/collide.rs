@@ -1,9 +1,14 @@
-use crate::components::{Enemy, HitBox, ShipLaser};
-use crate::event::EntityDespawnEvent;
+use crate::{
+    components::{Enemy, HitBox, ShipLaser, TimeToLive},
+    constant::ANIMATION_INTERVAL,
+    entity::spawn_explosion,
+    events::EnemyShipLaserCollisionEvent,
+    resource::GameState,
+};
 use bevy::prelude::*;
 
-pub fn laser_collides_enemy(
-    mut entity_despawn_events: ResMut<Events<EntityDespawnEvent>>,
+pub fn enemy_with_laser(
+    mut enemy_laser_collision_events: ResMut<Events<EnemyShipLaserCollisionEvent>>,
     ship_lasers_query: Query<(Entity, &ShipLaser, &HitBox, &Transform)>,
     enemies_query: Query<(Entity, &Enemy, &HitBox, &Transform)>,
 ) {
@@ -19,11 +24,9 @@ pub fn laser_collides_enemy(
             )
             .is_some()
             {
-                entity_despawn_events.send(EntityDespawnEvent {
-                    entity: enemy_entity,
-                });
-                entity_despawn_events.send(EntityDespawnEvent {
-                    entity: ship_laser_entity,
+                enemy_laser_collision_events.send(EnemyShipLaserCollisionEvent {
+                    enemy_entity,
+                    ship_laser_entity,
                 });
             }
         }

@@ -3,7 +3,7 @@ use crate::{
     constant::{
         ANIMATION_INTERVAL, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
         ENEMY_INITIAL_VELOCITY, ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH,
-        ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH, SPRITE_SCALING_FACTOR,
+        ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
     },
     resource::GameState,
 };
@@ -26,24 +26,15 @@ pub fn spawn_enemy(
 ) {
     let (hit_box_vec2, texture_atlas_handle_key) = match enemy_variant {
         EnemyVariant::Small => (
-            Vec2::new(
-                ENEMY_SMALL_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                ENEMY_SMALL_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            ),
+            Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
             "enemy-small",
         ),
         EnemyVariant::Medium => (
-            Vec2::new(
-                ENEMY_MEDIUM_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                ENEMY_MEDIUM_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            ),
+            Vec2::new(ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT),
             "enemy-medium",
         ),
         EnemyVariant::Big => (
-            Vec2::new(
-                ENEMY_BIG_SPRITE_WIDTH * SPRITE_SCALING_FACTOR,
-                ENEMY_BIG_SPRITE_HEIGHT * SPRITE_SCALING_FACTOR,
-            ),
+            Vec2::new(ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT),
             "enemy-big",
         ),
     };
@@ -54,7 +45,6 @@ pub fn spawn_enemy(
             texture_atlas,
             transform: Transform {
                 translation,
-                scale: Vec3::splat(SPRITE_SCALING_FACTOR),
                 ..Default::default()
             },
             ..Default::default()
