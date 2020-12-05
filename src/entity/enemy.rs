@@ -5,7 +5,8 @@ use crate::{
         ENEMY_INITIAL_VELOCITY, ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH,
         ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
     },
-    resource::GameState,
+    events::EnemySpawnEvent,
+    resource::{EventReaders, TextureAtlasHandles},
 };
 use bevy::prelude::*;
 
@@ -18,49 +19,50 @@ pub struct EnemyComponents {
     pub animation: Animation,
 }
 
-pub fn spawn_enemy(
+pub fn enemy_spawn_event_listener(
     mut commands: Commands,
-    game_state: Res<GameState>,
-    enemy_variant: EnemyVariant,
-    translation: Vec3,
+    enemy_spawn_events: Res<Events<EnemySpawnEvent>>,
+    texture_atlas_handles: Res<TextureAtlasHandles>,
+    mut event_readers: ResMut<EventReaders>,
 ) {
-    let (hit_box_vec2, texture_atlas_handle_key) = match enemy_variant {
-        EnemyVariant::Small => (
-            Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
-            "enemy-small",
-        ),
-        EnemyVariant::Medium => (
-            Vec2::new(ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT),
-            "enemy-medium",
-        ),
-        EnemyVariant::Big => (
-            Vec2::new(ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT),
-            "enemy-big",
-        ),
-    };
-    let texture_atlas = game_state.texture_atlas_handles[texture_atlas_handle_key].clone();
+    for enemy_spawn_event in event_readers.enemy_spawn.iter(&enemy_spawn_events) {
+        let (hit_box_vec2, texture_atlas) = match enemy_spawn_event.enemy_variant {
+            EnemyVariant::Small => (
+                Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
+                texture_atlas_handles.enemy_small.clone(),
+            ),
+            EnemyVariant::Medium => (
+                Vec2::new(ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_MEDIUM_SPRITE_HEIGHT),
+                texture_atlas_handles.enemy_medium.clone(),
+            ),
+            EnemyVariant::Big => (
+                Vec2::new(ENEMY_BIG_SPRITE_WIDTH, ENEMY_BIG_SPRITE_HEIGHT),
+                texture_atlas_handles.enemy_big.clone(),
+            ),
+        };
 
-    commands
-        .spawn(SpriteSheetComponents {
-            texture_atlas,
-            transform: Transform {
-                translation,
+        commands
+            .spawn(SpriteSheetComponents {
+                texture_atlas,
+                transform: Transform {
+                    translation: enemy_spawn_event.enemy_translation,
+                    ..Default::default()
+                },
                 ..Default::default()
-            },
-            ..Default::default()
-        })
-        .with_bundle(EnemyComponents {
-            enemy: Enemy,
-            enemy_variant,
-            hit_box: HitBox(hit_box_vec2),
-            velocity: Velocity(Vec2::new(
-                ENEMY_INITIAL_VELOCITY.0,
-                ENEMY_INITIAL_VELOCITY.1,
-            )),
-            animation: Animation {
-                idx_delta: 1,
-                sprite_count: 2,
-                timer: Timer::new(ANIMATION_INTERVAL, true),
-            },
-        });
+            })
+            .with_bundle(EnemyComponents {
+                enemy: Enemy,
+                enemy_variant: enemy_spawn_event.enemy_variant.clone(),
+                hit_box: HitBox(hit_box_vec2),
+                velocity: Velocity(Vec2::new(
+                    ENEMY_INITIAL_VELOCITY.0,
+                    ENEMY_INITIAL_VELOCITY.1,
+                )),
+                animation: Animation {
+                    idx_delta: 1,
+                    sprite_count: 2,
+                    timer: Timer::new(ANIMATION_INTERVAL, true),
+                },
+            });
+    }
 }

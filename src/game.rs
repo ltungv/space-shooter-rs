@@ -8,12 +8,18 @@ pub struct Game;
 impl Plugin for Game {
     // this is where we set up our plugin
     fn build(&self, app: &mut AppBuilder) {
-        app.init_resource::<resource::GameState>()
+        app.init_resource::<resource::TextureAtlasHandles>()
+            .init_resource::<resource::EventReaders>()
+            .add_event::<events::EnemySpawnEvent>()
+            .add_event::<events::ShipLaserSpawnEvent>()
+            .add_event::<events::ExplosionSpawnEvent>()
             .add_event::<events::EnemyShipLaserCollisionEvent>()
-            .add_startup_system(resource::initialize_texture_atlases.system())
             .add_startup_system(entity::initialize_camera.system())
             .add_startup_system(entity::initialize_ship.system())
             .add_startup_system(entity::initialize_enemy_spawner.system())
+            .add_system(entity::enemy_spawn_event_listener.system())
+            .add_system(entity::explosion_spawn_event_listener.system())
+            .add_system(entity::ship_laser_spawn_event_listener.system())
             .add_system(systems::spawner::trigger_enemy_spawn.system())
             .add_system(systems::input::keyboard_control_ship.system())
             .add_system(systems::input::keyboard_fire_ship_laser.system())

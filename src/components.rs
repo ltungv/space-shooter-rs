@@ -59,5 +59,5 @@ pub struct Explosion;
 #[derive(Debug)]
 pub struct HitBox(pub Vec2);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TimeToLive(pub Timer);

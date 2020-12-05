@@ -1,9 +1,6 @@
 use crate::{
-    components::{Enemy, HitBox, ShipLaser, TimeToLive},
-    constant::ANIMATION_INTERVAL,
-    entity::spawn_explosion,
+    components::{Enemy, HitBox, ShipLaser},
     events::EnemyShipLaserCollisionEvent,
-    resource::GameState,
 };
 use bevy::prelude::*;
 

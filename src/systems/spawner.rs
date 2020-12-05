@@ -5,8 +5,7 @@ use crate::{
         ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
         ENEMY_SMALL_SPRITE_WIDTH,
     },
-    entity,
-    resource::GameState,
+    events::EnemySpawnEvent,
 };
 use bevy::prelude::*;
 use rand::prelude::*;
@@ -14,9 +13,8 @@ use rand::prelude::*;
 /// Go through all enemy spawners and check if they ready to spawn new entity,
 /// create entity as the spawn timer finishes.
 pub fn trigger_enemy_spawn(
-    commands: Commands,
     time: Res<Time>,
-    game_state: Res<GameState>,
+    mut enemy_spawn_events: ResMut<Events<EnemySpawnEvent>>,
     mut enemy_spawner: Mut<EnemySpawner>,
 ) {
     enemy_spawner.timer.tick(time.delta_seconds);
@@ -37,14 +35,17 @@ pub fn trigger_enemy_spawn(
         };
 
         // Enemy comes from the top of the screen with random x-axis position
-        let translation_x_range = ARENA_WIDTH - enemy_width;
-        let translation_x_min = -translation_x_range / 2.;
-        let translation = Vec3::new(
-            translation_x_min + rng.gen::<f32>() * translation_x_range,
+        let enemy_translation_x_range = ARENA_WIDTH - enemy_width;
+        let enemy_translation_x_min = -enemy_translation_x_range / 2.;
+        let enemy_translation = Vec3::new(
+            enemy_translation_x_min + rng.gen::<f32>() * enemy_translation_x_range,
             (ARENA_HEIGHT + enemy_height) / 2.,
             0.,
         );
 
-        entity::spawn_enemy(commands, game_state, enemy_variant, translation);
+        enemy_spawn_events.send(EnemySpawnEvent {
+            enemy_variant,
+            enemy_translation,
+        });
     }
 }

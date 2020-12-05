@@ -4,7 +4,8 @@ use crate::{
         ANIMATION_INTERVAL, SHIP_LASER_INITIAL_VELOCITY, SHIP_LASER_SPRITE_HEIGHT,
         SHIP_LASER_SPRITE_WIDTH, SHIP_LASER_TIME_TO_LIVE_DURATION,
     },
-    resource::GameState,
+    events::ShipLaserSpawnEvent,
+    resource::{EventReaders, TextureAtlasHandles},
 };
 use bevy::prelude::*;
 
@@ -17,13 +18,21 @@ pub struct ShipLaserComponents {
     pub animation: Animation,
 }
 
-pub fn spawn_ship_laser(mut commands: Commands, game_state: Res<GameState>, translation: Vec3) {
-    if let Some(texture_atlas_handle) = game_state.texture_atlas_handles.get("laser-bolts") {
+pub fn ship_laser_spawn_event_listener(
+    mut commands: Commands,
+    ship_laser_spawn_events: Res<Events<ShipLaserSpawnEvent>>,
+    texture_atlas_handles: Res<TextureAtlasHandles>,
+    mut event_readers: ResMut<EventReaders>,
+) {
+    for ship_laser_spawn_event in event_readers
+        .ship_laser_spawn
+        .iter(&ship_laser_spawn_events)
+    {
         commands
             .spawn(SpriteSheetComponents {
-                texture_atlas: texture_atlas_handle.clone(),
+                texture_atlas: texture_atlas_handles.laser_bolts.clone(),
                 transform: Transform {
-                    translation,
+                    translation: ship_laser_spawn_event.laser_translation,
                     ..Default::default()
                 },
                 sprite: TextureAtlasSprite::new(1),

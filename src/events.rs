@@ -1,18 +1,23 @@
-use crate::components::EnemyVariant;
+use crate::components::{EnemyVariant, TimeToLive};
 use bevy::prelude::*;
 
-pub struct EnemyShipLaserCollisionEvent {
-    pub enemy_entity: Entity,
-    pub ship_laser_entity: Entity,
-}
-
 pub struct ShipLaserSpawnEvent {
-    pub ship_translation: Vec3,
+    pub laser_translation: Vec3,
 }
 
 pub struct EnemySpawnEvent {
     pub enemy_variant: EnemyVariant,
     pub enemy_translation: Vec3,
+}
+
+pub struct ExplosionSpawnEvent {
+    pub explosion_translation: Vec3,
+    pub explosion_time_to_live: TimeToLive,
+}
+
+pub struct EnemyShipLaserCollisionEvent {
+    pub enemy_entity: Entity,
+    pub ship_laser_entity: Entity,
 }
 
 pub struct EnemyDestroyedEvent {
