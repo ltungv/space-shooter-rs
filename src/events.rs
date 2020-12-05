@@ -19,7 +19,3 @@ pub struct EnemyShipLaserCollisionEvent {
     pub enemy_entity: Entity,
     pub ship_laser_entity: Entity,
 }
-
-pub struct EnemyDestroyedEvent {
-    pub enemy_entity: Entity,
-}

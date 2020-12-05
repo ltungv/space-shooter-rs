@@ -24,7 +24,7 @@ pub fn ship_laser_spawn_event_listener(
     texture_atlas_handles: Res<TextureAtlasHandles>,
     mut event_readers: ResMut<EventReaders>,
 ) {
-    for ship_laser_spawn_event in event_readers
+    for evt in event_readers
         .ship_laser_spawn
         .iter(&ship_laser_spawn_events)
     {
@@ -32,7 +32,7 @@ pub fn ship_laser_spawn_event_listener(
             .spawn(SpriteSheetComponents {
                 texture_atlas: texture_atlas_handles.laser_bolts.clone(),
                 transform: Transform {
-                    translation: ship_laser_spawn_event.laser_translation,
+                    translation: evt.laser_translation,
                     ..Default::default()
                 },
                 sprite: TextureAtlasSprite::new(1),

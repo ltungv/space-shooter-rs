@@ -1,6 +1,6 @@
 use crate::{
+    components::{Enemy, HitBox, ShipLaser, TimeToLive},
     constant::ANIMATION_INTERVAL,
-    components::{TimeToLive, Enemy, HitBox, ShipLaser},
     events::{EnemyShipLaserCollisionEvent, ExplosionSpawnEvent},
     resource::EventReaders,
 };
@@ -39,19 +39,19 @@ pub fn enemy_ship_laser_collision_event_listener(
     mut event_readers: ResMut<EventReaders>,
     query_enemy: Query<&Transform>,
 ) {
-    for enemy_ship_laser_collision_event in event_readers
+    for evt in event_readers
         .enemy_ship_laser_collision
         .iter(&enemy_ship_laser_collision_events)
     {
         let enemy_transform = query_enemy
-            .get(enemy_ship_laser_collision_event.enemy_entity)
+            .get(evt.enemy_entity)
             .expect("Could not get enemy transform component");
         explosion_spawn_events.send(ExplosionSpawnEvent {
             explosion_translation: enemy_transform.translation,
             explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
         });
 
-        commands.despawn(enemy_ship_laser_collision_event.enemy_entity);
-        commands.despawn(enemy_ship_laser_collision_event.ship_laser_entity);
+        commands.despawn(evt.enemy_entity);
+        commands.despawn(evt.ship_laser_entity);
     }
 }

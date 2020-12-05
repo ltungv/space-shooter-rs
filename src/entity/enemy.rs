@@ -25,8 +25,8 @@ pub fn enemy_spawn_event_listener(
     texture_atlas_handles: Res<TextureAtlasHandles>,
     mut event_readers: ResMut<EventReaders>,
 ) {
-    for enemy_spawn_event in event_readers.enemy_spawn.iter(&enemy_spawn_events) {
-        let (hit_box_vec2, texture_atlas) = match enemy_spawn_event.enemy_variant {
+    for evt in event_readers.enemy_spawn.iter(&enemy_spawn_events) {
+        let (hit_box_vec2, texture_atlas) = match evt.enemy_variant {
             EnemyVariant::Small => (
                 Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),
                 texture_atlas_handles.enemy_small.clone(),
@@ -45,14 +45,14 @@ pub fn enemy_spawn_event_listener(
             .spawn(SpriteSheetComponents {
                 texture_atlas,
                 transform: Transform {
-                    translation: enemy_spawn_event.enemy_translation,
+                    translation: evt.enemy_translation,
                     ..Default::default()
                 },
                 ..Default::default()
             })
             .with_bundle(EnemyComponents {
                 enemy: Enemy,
-                enemy_variant: enemy_spawn_event.enemy_variant.clone(),
+                enemy_variant: evt.enemy_variant.clone(),
                 hit_box: HitBox(hit_box_vec2),
                 velocity: Velocity(Vec2::new(
                     ENEMY_INITIAL_VELOCITY.0,
