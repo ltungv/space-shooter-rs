@@ -11,7 +11,6 @@ use bevy::prelude::*;
 #[derive(Bundle)]
 pub struct ShipComponents {
     pub ship: Ship,
-    pub ship_animation_state: ShipAnimationState,
     pub velocity: Velocity,
     pub hit_box: HitBox,
     pub animation: Animation,
@@ -27,11 +26,11 @@ pub fn initialize_ship(mut commands: Commands, texture_atlas_handles: Res<Textur
         })
         .with_bundle(ShipComponents {
             ship: Ship {
+                animation_state: ShipAnimationState::Stabilized,
                 move_speed: SHIP_INITIAL_MOVE_SPEED,
                 laser_cooldown_timer: Timer::new(SHIP_LASER_COOLDOWN_DURATION, false),
                 transition_timer: Timer::new(SHIP_STATE_TRANSITION_DURATION, false),
             },
-            ship_animation_state: ShipAnimationState::Stabilized,
             hit_box: HitBox(Vec2::new(SHIP_SPRITE_WIDTH, SHIP_SPRITE_HEIGHT)),
             velocity: Velocity(Vec2::default()),
             animation: Animation {

@@ -13,6 +13,7 @@ pub enum ShipAnimationState {
 /// Component that marks an entity to be a ship in the game
 #[derive(Debug)]
 pub struct Ship {
+    pub animation_state: ShipAnimationState,
     pub move_speed: f32,
     pub laser_cooldown_timer: Timer,
     pub transition_timer: Timer,
@@ -28,7 +29,9 @@ pub enum EnemyVariant {
 
 /// Component marks an entity to be an enemy
 #[derive(Debug)]
-pub struct Enemy;
+pub struct Enemy {
+    pub variant: EnemyVariant,
+}
 
 /// Component determines the spawn rate and spawn probability of entities
 #[derive(Debug)]

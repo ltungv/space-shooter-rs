@@ -13,7 +13,6 @@ use bevy::prelude::*;
 #[derive(Bundle)]
 pub struct EnemyComponents {
     pub enemy: Enemy,
-    pub enemy_variant: EnemyVariant,
     pub velocity: Velocity,
     pub hit_box: HitBox,
     pub animation: Animation,
@@ -51,8 +50,9 @@ pub fn enemy_spawn_event_listener(
                 ..Default::default()
             })
             .with_bundle(EnemyComponents {
-                enemy: Enemy,
-                enemy_variant: evt.enemy_variant.clone(),
+                enemy: Enemy {
+                    variant: evt.enemy_variant.clone(),
+                },
                 hit_box: HitBox(hit_box_vec2),
                 velocity: Velocity(Vec2::new(
                     ENEMY_INITIAL_VELOCITY.0,
