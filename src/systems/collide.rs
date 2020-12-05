@@ -1,6 +1,8 @@
 use crate::{
-    components::{Enemy, HitBox, ShipLaser},
-    events::EnemyShipLaserCollisionEvent,
+    constant::ANIMATION_INTERVAL,
+    components::{TimeToLive, Enemy, HitBox, ShipLaser},
+    events::{EnemyShipLaserCollisionEvent, ExplosionSpawnEvent},
+    resource::EventReaders,
 };
 use bevy::prelude::*;
 
@@ -27,5 +29,29 @@ pub fn enemy_with_laser(
                 });
             }
         }
+    }
+}
+
+pub fn enemy_ship_laser_collision_event_listener(
+    mut commands: Commands,
+    enemy_ship_laser_collision_events: Res<Events<EnemyShipLaserCollisionEvent>>,
+    mut explosion_spawn_events: ResMut<Events<ExplosionSpawnEvent>>,
+    mut event_readers: ResMut<EventReaders>,
+    query_enemy: Query<&Transform>,
+) {
+    for enemy_ship_laser_collision_event in event_readers
+        .enemy_ship_laser_collision
+        .iter(&enemy_ship_laser_collision_events)
+    {
+        let enemy_transform = query_enemy
+            .get(enemy_ship_laser_collision_event.enemy_entity)
+            .expect("Could not get enemy transform component");
+        explosion_spawn_events.send(ExplosionSpawnEvent {
+            explosion_translation: enemy_transform.translation,
+            explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
+        });
+
+        commands.despawn(enemy_ship_laser_collision_event.enemy_entity);
+        commands.despawn(enemy_ship_laser_collision_event.ship_laser_entity);
     }
 }

@@ -26,8 +26,9 @@ impl Plugin for Game {
             .add_system(systems::motion::apply_velocity_to_translation.system())
             .add_system(systems::ship::limit_translation.system())
             .add_system(systems::ship::animation_state_transition.system())
-            .add_system(systems::collide::enemy_with_laser.system())
             .add_system(systems::animation::texture_atlas_cycle.system())
+            .add_system(systems::collide::enemy_with_laser.system())
+            .add_system(systems::collide::enemy_ship_laser_collision_event_listener.system())
             .add_system(systems::enemy::despawn_out_of_bound.system())
             .add_system(systems::time_to_live::despawn_expired.system());
     }

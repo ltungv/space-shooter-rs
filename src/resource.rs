@@ -104,7 +104,7 @@ impl FromResources for TextureAtlasHandles {
         let texture_atlas = TextureAtlas::from_grid(
             asset_server.load("spritesheets/explosion.png"),
             Vec2::new(EXPLOSION_SPRITE_WIDTH, EXPLOSION_SPRITE_HEIGHT),
-            2,
+            5,
             1,
         );
         let explosion = texture_atlases.add(texture_atlas);
