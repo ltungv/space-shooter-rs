@@ -4,7 +4,7 @@ Simple space shooter game written in [Rust](https://www.rust-lang.org) using [Be
 
 ## Goals
 
-This is me trying to design and implement a complete game using the Entity-Component-System paradigm. Before this project, I've tried out game development using other Rust game engines/ECS libraries, namely [Amethyst](https://amethyst.rs) (this uses [specs](https://github.com/amethyst/specs) as the ECS library) and [ggez](https://ggez.rs) together with [legion](https://github.com/amethyst/legion), but I found those quite complex and unintuitive for a beginner like me.
+This is me trying to design and implement a complete game using the Entity-Component-System paradigm. I've tried out game development using other Rust game engines, namely [Amethyst](https://amethyst.rs) and [ggez](https://ggez.rs) in combination with [legion](https://github.com/amethyst/legion), but I found those solutions to be quite complex.
 
 ## Todos
 
