@@ -1,5 +1,5 @@
 use crate::{
-    components::{Animation, HitBox, Ship, ShipAnimationState, Velocity},
+    components::{Animation, ConstrainedToArena, HitBox, Ship, ShipAnimationState, Velocity},
     constant::{
         ANIMATION_INTERVAL, SHIP_INITIAL_MOVE_SPEED, SHIP_LASER_COOLDOWN_DURATION,
         SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH, SHIP_STATE_TRANSITION_DURATION,
@@ -11,6 +11,7 @@ use bevy::prelude::*;
 #[derive(Bundle)]
 pub struct ShipComponents {
     pub ship: Ship,
+    pub constrained_to_arena: ConstrainedToArena,
     pub velocity: Velocity,
     pub hit_box: HitBox,
     pub animation: Animation,
@@ -31,6 +32,7 @@ pub fn initialize_ship(mut commands: Commands, texture_atlas_handles: Res<Textur
                 laser_cooldown_timer: Timer::new(SHIP_LASER_COOLDOWN_DURATION, false),
                 transition_timer: Timer::new(SHIP_STATE_TRANSITION_DURATION, false),
             },
+            constrained_to_arena: ConstrainedToArena,
             hit_box: HitBox(Vec2::new(SHIP_SPRITE_WIDTH, SHIP_SPRITE_HEIGHT)),
             velocity: Velocity(Vec2::default()),
             animation: Animation {

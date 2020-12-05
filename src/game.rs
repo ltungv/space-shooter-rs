@@ -21,15 +21,15 @@ impl Plugin for Game {
             .add_system(entity::spawn_explosion.system())
             .add_system(entity::spawn_ship_laser.system())
             .add_system(systems::spawner::spawn_enemy_trigger.system())
-            .add_system(systems::input::keyboard_control_ship.system())
-            .add_system(systems::input::keyboard_fire_ship_laser.system())
-            .add_system(systems::motion::apply_velocity.system())
-            .add_system(systems::ship::limit_translation.system())
+            .add_system(systems::ship::keyboard_control.system())
+            .add_system(systems::ship::fire_laser.system())
             .add_system(systems::ship::animation_state_transition.system())
-            .add_system(systems::animation::texture_atlas_cycle.system())
+            .add_system(systems::motion::apply_velocity.system())
+            .add_system(systems::motion::constrained_to_arena.system())
             .add_system(systems::collide::check_collision_enemy_ship_laser.system())
             .add_system(systems::collide::handle_collision_enemy_ship_laser.system())
             .add_system(systems::cleanup::despawn_out_of_arena_enemy.system())
-            .add_system(systems::cleanup::despawn_expired_time_to_live.system());
+            .add_system(systems::cleanup::despawn_expired_time_to_live.system())
+            .add_system(systems::animation::texture_atlas_cycle.system());
     }
 }

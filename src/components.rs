@@ -44,6 +44,12 @@ pub struct EnemySpawner {
 pub struct ShipLaser;
 
 #[derive(Debug)]
+pub struct Explosion;
+
+#[derive(Debug)]
+pub struct ConstrainedToArena;
+
+#[derive(Debug)]
 pub struct Velocity(pub Vec2);
 
 /// Component that determines when to change the sprite and which sprite index to change to when
@@ -54,9 +60,6 @@ pub struct Animation {
     pub sprite_count: u32,
     pub timer: Timer,
 }
-
-#[derive(Debug)]
-pub struct Explosion;
 
 /// Component that determines the smallest possible box that includes rendered the entity.
 #[derive(Debug)]
