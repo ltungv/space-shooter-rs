@@ -5,17 +5,17 @@ use crate::{
         EXPLOSION_SPRITE_HEIGHT, EXPLOSION_SPRITE_WIDTH, SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH,
     },
     events::{
-        EnemyShipLaserCollisionEvent, EnemySpawnEvent, ExplosionSpawnEvent, ShipLaserSpawnEvent,
+        CollisionEnemyShipLaserEvent, SpawnEnemyEvent, SpawnExplosionEvent, SpawnShipLaserEvent,
     },
 };
 use bevy::prelude::*;
 
 #[derive(Default)]
 pub struct EventReaders {
-    pub enemy_ship_laser_collision: EventReader<EnemyShipLaserCollisionEvent>,
-    pub enemy_spawn: EventReader<EnemySpawnEvent>,
-    pub explosion_spawn: EventReader<ExplosionSpawnEvent>,
-    pub ship_laser_spawn: EventReader<ShipLaserSpawnEvent>,
+    pub collision_enemy_ship_laser: EventReader<CollisionEnemyShipLaserEvent>,
+    pub spawn_enemy: EventReader<SpawnEnemyEvent>,
+    pub spawn_explosion: EventReader<SpawnExplosionEvent>,
+    pub spawn_ship_laser: EventReader<SpawnShipLaserEvent>,
 }
 
 pub struct TextureAtlasHandles {

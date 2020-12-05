@@ -5,7 +5,7 @@ use crate::{
         ENEMY_INITIAL_VELOCITY, ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH,
         ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
     },
-    events::EnemySpawnEvent,
+    events::SpawnEnemyEvent,
     resource::{EventReaders, TextureAtlasHandles},
 };
 use bevy::prelude::*;
@@ -20,11 +20,11 @@ pub struct EnemyComponents {
 
 pub fn spawn_enemy(
     mut commands: Commands,
-    enemy_spawn_events: Res<Events<EnemySpawnEvent>>,
+    spawn_enemy_events: Res<Events<SpawnEnemyEvent>>,
     texture_atlas_handles: Res<TextureAtlasHandles>,
     mut event_readers: ResMut<EventReaders>,
 ) {
-    for evt in event_readers.enemy_spawn.iter(&enemy_spawn_events) {
+    for evt in event_readers.spawn_enemy.iter(&spawn_enemy_events) {
         let (hit_box_vec2, texture_atlas) = match evt.enemy_variant {
             EnemyVariant::Small => (
                 Vec2::new(ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),

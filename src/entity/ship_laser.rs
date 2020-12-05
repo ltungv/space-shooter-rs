@@ -4,7 +4,7 @@ use crate::{
         ANIMATION_INTERVAL, SHIP_LASER_INITIAL_VELOCITY, SHIP_LASER_SPRITE_HEIGHT,
         SHIP_LASER_SPRITE_WIDTH, SHIP_LASER_TIME_TO_LIVE_DURATION,
     },
-    events::ShipLaserSpawnEvent,
+    events::SpawnShipLaserEvent,
     resource::{EventReaders, TextureAtlasHandles},
 };
 use bevy::prelude::*;
@@ -20,13 +20,13 @@ pub struct ShipLaserComponents {
 
 pub fn spawn_ship_laser(
     mut commands: Commands,
-    ship_laser_spawn_events: Res<Events<ShipLaserSpawnEvent>>,
+    spawn_ship_laser_events: Res<Events<SpawnShipLaserEvent>>,
     texture_atlas_handles: Res<TextureAtlasHandles>,
     mut event_readers: ResMut<EventReaders>,
 ) {
     for evt in event_readers
-        .ship_laser_spawn
-        .iter(&ship_laser_spawn_events)
+        .spawn_ship_laser
+        .iter(&spawn_ship_laser_events)
     {
         commands
             .spawn(SpriteSheetComponents {

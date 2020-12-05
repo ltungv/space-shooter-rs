@@ -1,7 +1,7 @@
 use crate::{
     components::{Animation, Explosion, TimeToLive},
     constant::ANIMATION_INTERVAL,
-    events::ExplosionSpawnEvent,
+    events::SpawnExplosionEvent,
     resource::{EventReaders, TextureAtlasHandles},
 };
 use bevy::prelude::*;
@@ -15,11 +15,11 @@ pub struct ExplosionComponents {
 
 pub fn spawn_explosion(
     mut commands: Commands,
-    explosion_spawn_events: Res<Events<ExplosionSpawnEvent>>,
+    spawn_explosion_events: Res<Events<SpawnExplosionEvent>>,
     texture_atlas_handles: Res<TextureAtlasHandles>,
     mut event_readers: ResMut<EventReaders>,
 ) {
-    for evt in event_readers.explosion_spawn.iter(&explosion_spawn_events) {
+    for evt in event_readers.spawn_explosion.iter(&spawn_explosion_events) {
         commands
             .spawn(SpriteSheetComponents {
                 texture_atlas: texture_atlas_handles.explosion.clone(),

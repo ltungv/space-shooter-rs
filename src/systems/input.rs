@@ -1,6 +1,6 @@
 use crate::{
     components::{HitBox, Ship, Velocity},
-    events::ShipLaserSpawnEvent,
+    events::SpawnShipLaserEvent,
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
@@ -42,7 +42,7 @@ pub fn keyboard_control_ship(
 pub fn keyboard_fire_ship_laser(
     time: Res<Time>,
     kb_input: Res<Input<KeyCode>>,
-    mut ship_laser_spawn_events: ResMut<Events<ShipLaserSpawnEvent>>,
+    mut spawn_ship_laser_events: ResMut<Events<SpawnShipLaserEvent>>,
     transform: &Transform,
     HitBox(hit_box): &HitBox,
     mut ship: Mut<Ship>,
@@ -51,6 +51,6 @@ pub fn keyboard_fire_ship_laser(
     if kb_input.pressed(KeyCode::Space) && ship.laser_cooldown_timer.finished {
         ship.laser_cooldown_timer.reset();
         let laser_translation = transform.translation + hit_box.x() * Vec3::unit_y();
-        ship_laser_spawn_events.send(ShipLaserSpawnEvent { laser_translation })
+        spawn_ship_laser_events.send(SpawnShipLaserEvent { laser_translation })
     }
 }

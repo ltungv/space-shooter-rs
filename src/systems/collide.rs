@@ -1,13 +1,13 @@
 use crate::{
     components::{Enemy, HitBox, ShipLaser, TimeToLive},
     constant::ANIMATION_INTERVAL,
-    events::{EnemyShipLaserCollisionEvent, ExplosionSpawnEvent},
+    events::{CollisionEnemyShipLaserEvent, SpawnExplosionEvent},
     resource::EventReaders,
 };
 use bevy::prelude::*;
 
-pub fn enemy_ship_laser_collision_check(
-    mut enemy_laser_collision_events: ResMut<Events<EnemyShipLaserCollisionEvent>>,
+pub fn check_collision_enemy_ship_laser(
+    mut collision_enemy_laser_events: ResMut<Events<CollisionEnemyShipLaserEvent>>,
     ship_lasers_query: Query<(Entity, &ShipLaser, &HitBox, &Transform)>,
     enemies_query: Query<(Entity, &Enemy, &HitBox, &Transform)>,
 ) {
@@ -23,7 +23,7 @@ pub fn enemy_ship_laser_collision_check(
             )
             .is_some()
             {
-                enemy_laser_collision_events.send(EnemyShipLaserCollisionEvent {
+                collision_enemy_laser_events.send(CollisionEnemyShipLaserEvent {
                     enemy_entity,
                     ship_laser_entity,
                 });
@@ -32,21 +32,21 @@ pub fn enemy_ship_laser_collision_check(
     }
 }
 
-pub fn enemy_ship_laser_collision_handle(
+pub fn handle_collision_enemy_ship_laser(
     mut commands: Commands,
-    enemy_ship_laser_collision_events: Res<Events<EnemyShipLaserCollisionEvent>>,
-    mut explosion_spawn_events: ResMut<Events<ExplosionSpawnEvent>>,
+    collision_enemy_laser_events: Res<Events<CollisionEnemyShipLaserEvent>>,
+    mut spawn_explosion_events: ResMut<Events<SpawnExplosionEvent>>,
     mut event_readers: ResMut<EventReaders>,
     query_enemy: Query<&Transform>,
 ) {
     for evt in event_readers
-        .enemy_ship_laser_collision
-        .iter(&enemy_ship_laser_collision_events)
+        .collision_enemy_ship_laser
+        .iter(&collision_enemy_laser_events)
     {
         let enemy_transform = query_enemy
             .get(evt.enemy_entity)
             .expect("Could not get enemy transform component");
-        explosion_spawn_events.send(ExplosionSpawnEvent {
+        spawn_explosion_events.send(SpawnExplosionEvent {
             explosion_translation: enemy_transform.translation,
             explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
         });

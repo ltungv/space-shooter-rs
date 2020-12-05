@@ -5,16 +5,16 @@ use crate::{
         ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
         ENEMY_SMALL_SPRITE_WIDTH,
     },
-    events::EnemySpawnEvent,
+    events::SpawnEnemyEvent,
 };
 use bevy::prelude::*;
 use rand::prelude::*;
 
 /// Go through all enemy spawners and check if they ready to spawn new entity,
 /// create entity as the spawn timer finishes.
-pub fn trigger_enemy_spawn(
+pub fn spawn_enemy_trigger(
     time: Res<Time>,
-    mut enemy_spawn_events: ResMut<Events<EnemySpawnEvent>>,
+    mut spawn_enemy_events: ResMut<Events<SpawnEnemyEvent>>,
     mut enemy_spawner: Mut<EnemySpawner>,
 ) {
     enemy_spawner.timer.tick(time.delta_seconds);
@@ -43,7 +43,7 @@ pub fn trigger_enemy_spawn(
             0.,
         );
 
-        enemy_spawn_events.send(EnemySpawnEvent {
+        spawn_enemy_events.send(SpawnEnemyEvent {
             enemy_variant,
             enemy_translation,
         });
