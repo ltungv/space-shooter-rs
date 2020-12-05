@@ -1,7 +1,6 @@
 pub mod animation;
+pub mod cleanup;
 pub mod collide;
-pub mod enemy;
-pub mod time_to_live;
 pub mod input;
 pub mod motion;
 pub mod ship;

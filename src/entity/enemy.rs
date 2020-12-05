@@ -18,7 +18,7 @@ pub struct EnemyComponents {
     pub animation: Animation,
 }
 
-pub fn enemy_spawn_event_listener(
+pub fn spawn_enemy(
     mut commands: Commands,
     enemy_spawn_events: Res<Events<EnemySpawnEvent>>,
     texture_atlas_handles: Res<TextureAtlasHandles>,

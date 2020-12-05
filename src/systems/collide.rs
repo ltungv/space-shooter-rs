@@ -6,7 +6,7 @@ use crate::{
 };
 use bevy::prelude::*;
 
-pub fn enemy_with_laser(
+pub fn enemy_ship_laser_collision_check(
     mut enemy_laser_collision_events: ResMut<Events<EnemyShipLaserCollisionEvent>>,
     ship_lasers_query: Query<(Entity, &ShipLaser, &HitBox, &Transform)>,
     enemies_query: Query<(Entity, &Enemy, &HitBox, &Transform)>,
@@ -32,7 +32,7 @@ pub fn enemy_with_laser(
     }
 }
 
-pub fn enemy_ship_laser_collision_event_listener(
+pub fn enemy_ship_laser_collision_handle(
     mut commands: Commands,
     enemy_ship_laser_collision_events: Res<Events<EnemyShipLaserCollisionEvent>>,
     mut explosion_spawn_events: ResMut<Events<ExplosionSpawnEvent>>,

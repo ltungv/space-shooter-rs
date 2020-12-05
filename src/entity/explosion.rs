@@ -13,7 +13,7 @@ pub struct ExplosionComponents {
     pub animation: Animation,
 }
 
-pub fn explosion_spawn_event_listener(
+pub fn spawn_explosion(
     mut commands: Commands,
     explosion_spawn_events: Res<Events<ExplosionSpawnEvent>>,
     texture_atlas_handles: Res<TextureAtlasHandles>,

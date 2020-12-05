@@ -4,7 +4,7 @@ use bevy::prelude::*;
 // TODO: implement acceleration
 
 /// Change entities' position based on its current velocity
-pub fn apply_velocity_to_translation(
+pub fn apply_velocity(
     // Resources
     time: Res<Time>,
     Velocity(velocity): &Velocity,

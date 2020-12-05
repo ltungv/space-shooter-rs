@@ -18,7 +18,7 @@ pub struct ShipLaserComponents {
     pub animation: Animation,
 }
 
-pub fn ship_laser_spawn_event_listener(
+pub fn spawn_ship_laser(
     mut commands: Commands,
     ship_laser_spawn_events: Res<Events<ShipLaserSpawnEvent>>,
     texture_atlas_handles: Res<TextureAtlasHandles>,
