@@ -15,7 +15,6 @@ pub enum ShipAnimationState {
 pub struct Ship {
     pub animation_state: ShipAnimationState,
     pub move_speed: f32,
-    pub laser_cooldown_timer: Timer,
     pub transition_timer: Timer,
 }
 
@@ -31,7 +30,6 @@ pub enum EnemyVariant {
 #[derive(Debug)]
 pub struct Enemy {
     pub variant: EnemyVariant,
-    pub laser_cooldown_timer: Timer,
 }
 
 /// Component determines the spawn rate and spawn probability of entities
@@ -47,13 +45,16 @@ pub struct Laser {
 }
 
 #[derive(Debug)]
+pub struct Weapon {
+    pub cooldown_timer: Timer,
+    pub laser_velocity: Velocity,
+    pub laser_hit_box: HitBox,
+    pub laser_time_to_live: TimeToLive,
+    pub laser_initial_sprite_idx: u32,
+}
+
+#[derive(Debug)]
 pub struct Explosion;
-
-#[derive(Debug)]
-pub struct ConstrainedToArena;
-
-#[derive(Debug)]
-pub struct Velocity(pub Vec2);
 
 /// Component that determines when to change the sprite and which sprite index to change to when
 /// doing simple animation
@@ -64,8 +65,14 @@ pub struct Animation {
     pub timer: Timer,
 }
 
-/// Component that determines the smallest possible box that includes rendered the entity.
 #[derive(Debug)]
+pub struct ConstrainedToArena;
+
+#[derive(Debug, Clone)]
+pub struct Velocity(pub Vec2);
+
+/// Component that determines the smallest possible box that includes rendered the entity.
+#[derive(Debug, Clone)]
 pub struct HitBox(pub Vec2);
 
 #[derive(Debug, Clone)]

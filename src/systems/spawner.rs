@@ -18,7 +18,7 @@ pub fn spawn_enemy_trigger(
     mut enemy_spawner: Mut<EnemySpawner>,
 ) {
     enemy_spawner.timer.tick(time.delta_seconds);
-    if enemy_spawner.timer.just_finished {
+    if enemy_spawner.timer.finished {
         // Choose the name of the enemy to be spawned
         let mut rng = rand::thread_rng();
         let enemy_variant = enemy_spawner

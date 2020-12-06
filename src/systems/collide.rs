@@ -10,10 +10,9 @@ pub fn check_laser_ship(
     mut collision_laser_ship_events: ResMut<Events<CollisionLaserShipEvent>>,
     query_laser: Query<(Entity, &Laser, &HitBox, &Transform)>,
     query_ship: Query<(Entity, &Ship, &HitBox, &Transform)>,
-    query_enemy: Query<&Enemy>,
 ) {
     for (laser_entity, laser, HitBox(laser_hit_box), laser_transform) in query_laser.iter() {
-        if query_enemy.get(laser.source).is_ok() {
+        if query_ship.get(laser.source).is_err() {
             for (ship_entity, _ship, HitBox(ship_hit_box), ship_transform) in query_ship.iter() {
                 if bevy::sprite::collide_aabb::collide(
                     laser_transform.translation,
@@ -37,10 +36,9 @@ pub fn check_laser_enemy(
     mut collision_laser_enemy_events: ResMut<Events<CollisionLaserEnemyEvent>>,
     query_laser: Query<(Entity, &Laser, &HitBox, &Transform)>,
     query_enemy: Query<(Entity, &Enemy, &HitBox, &Transform)>,
-    query_ship: Query<&Ship>,
 ) {
     for (laser_entity, laser, HitBox(laser_hit_box), laser_transform) in query_laser.iter() {
-        if query_ship.get(laser.source).is_ok() {
+        if query_enemy.get(laser.source).is_err() {
             for (enemy_entity, _enemy, HitBox(enemy_hit_box), enemy_transform) in query_enemy.iter()
             {
                 if bevy::sprite::collide_aabb::collide(
@@ -80,7 +78,7 @@ pub fn handle_laser_ship(
             explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
         });
 
-        commands.despawn(evt.ship_entity);
+        commands.despawn_recursive(evt.ship_entity);
         commands.despawn(evt.laser_entity);
     }
 }
@@ -104,7 +102,7 @@ pub fn handle_laser_enemy(
             explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
         });
 
-        commands.despawn(evt.enemy_entity);
+        commands.despawn_recursive(evt.enemy_entity);
         commands.despawn(evt.laser_entity);
     }
 }

@@ -1,11 +1,13 @@
 use crate::{
-    components::{Animation, Enemy, EnemyVariant, HitBox, Velocity},
+    components::{Animation, Enemy, EnemyVariant, HitBox, TimeToLive, Velocity, Weapon},
     constant::{
-        ENEMY_LASER_COOLDOWN_DURATION,
         ANIMATION_INTERVAL, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
-        ENEMY_INITIAL_VELOCITY, ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH,
-        ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
+        ENEMY_INITIAL_VELOCITY, ENEMY_LASER_COOLDOWN_DURATION, ENEMY_LASER_INITIAL_VELOCITY,
+        ENEMY_LASER_SPRITE_HEIGHT, ENEMY_LASER_SPRITE_WIDTH, ENEMY_LASER_TIME_TO_LIVE_DURATION,
+        ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT,
+        ENEMY_SMALL_SPRITE_WIDTH,
     },
+    entity::WeaponComponents,
     events::SpawnEnemyEvent,
     resource::{EventReaders, TextureAtlasHandles},
 };
@@ -53,7 +55,6 @@ pub fn spawn_enemy(
             .with_bundle(EnemyComponents {
                 enemy: Enemy {
                     variant: evt.enemy_variant.clone(),
-                    laser_cooldown_timer: Timer::new(ENEMY_LASER_COOLDOWN_DURATION, false),
                 },
                 hit_box: HitBox(hit_box_vec2),
                 velocity: Velocity(Vec2::new(
@@ -65,6 +66,34 @@ pub fn spawn_enemy(
                     sprite_count: 2,
                     timer: Timer::new(ANIMATION_INTERVAL, true),
                 },
+            })
+            .with_children(|parent| {
+                let mut weapon_cooldown_timer = Timer::new(ENEMY_LASER_COOLDOWN_DURATION, false);
+                weapon_cooldown_timer.tick(ENEMY_LASER_COOLDOWN_DURATION.as_secs_f32());
+
+                parent.spawn(WeaponComponents {
+                    weapon: Weapon {
+                        cooldown_timer: weapon_cooldown_timer,
+                        laser_velocity: Velocity(Vec2::new(
+                            ENEMY_LASER_INITIAL_VELOCITY.0,
+                            ENEMY_LASER_INITIAL_VELOCITY.1,
+                        )),
+                        laser_hit_box: HitBox(Vec2::new(
+                            ENEMY_LASER_SPRITE_WIDTH,
+                            ENEMY_LASER_SPRITE_HEIGHT,
+                        )),
+                        laser_time_to_live: TimeToLive(Timer::new(
+                            ENEMY_LASER_TIME_TO_LIVE_DURATION,
+                            false,
+                        )),
+                        laser_initial_sprite_idx: 0,
+                    },
+                    transform: Transform {
+                        translation: -hit_box_vec2.y() * Vec3::unit_y(),
+                        ..Default::default()
+                    },
+                    global_transform: Default::default(),
+                });
             });
     }
 }

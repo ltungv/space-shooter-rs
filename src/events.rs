@@ -1,9 +1,13 @@
-use crate::components::{EnemyVariant, TimeToLive};
+use crate::components::{EnemyVariant, HitBox, TimeToLive, Velocity};
 use bevy::prelude::*;
 
 pub struct SpawnLaserEvent {
-    pub laser_translation: Vec3,
     pub laser_source: Entity,
+    pub laser_translation: Vec3,
+    pub laser_velocity: Velocity,
+    pub laser_hit_box: HitBox,
+    pub laser_time_to_live: TimeToLive,
+    pub laser_initial_sprite_idx: u32,
 }
 
 pub struct SpawnEnemyEvent {

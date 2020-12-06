@@ -1,14 +1,16 @@
 mod enemy;
 mod enemy_spawner;
-mod ship;
-mod laser;
 mod explosion;
+mod laser;
+mod ship;
+mod weapon;
 
 pub use enemy::*;
+pub use weapon::*;
 pub use enemy_spawner::*;
-pub use ship::*;
-pub use laser::*;
 pub use explosion::*;
+pub use laser::*;
+pub use ship::*;
 
 use crate::constant::ARENA_SCALE;
 use bevy::prelude::*;

@@ -27,6 +27,6 @@ pub fn despawn_out_of_arena_enemy(
         || transform.translation.x() + hit_box.x() / 2. <= -ARENA_WIDTH / 2.
         || transform.translation.x() - hit_box.x() / 2. >= ARENA_WIDTH / 2.
     {
-        commands.despawn(entity);
+        commands.despawn_recursive(entity);
     }
 }
