@@ -41,7 +41,9 @@ pub struct EnemySpawner {
 }
 
 #[derive(Debug)]
-pub struct ShipLaser;
+pub struct Laser {
+    pub source: Entity,
+}
 
 #[derive(Debug)]
 pub struct Explosion;

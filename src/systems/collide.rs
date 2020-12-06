@@ -1,47 +1,49 @@
 use crate::{
-    components::{Enemy, HitBox, ShipLaser, TimeToLive},
+    components::{Enemy, HitBox, Laser, Ship, TimeToLive},
     constant::ANIMATION_INTERVAL,
-    events::{CollisionEnemyShipLaserEvent, SpawnExplosionEvent},
+    events::{CollisionLaserEnemyEvent, SpawnExplosionEvent},
     resource::EventReaders,
 };
 use bevy::prelude::*;
 
-pub fn check_collision_enemy_ship_laser(
-    mut collision_enemy_laser_events: ResMut<Events<CollisionEnemyShipLaserEvent>>,
-    ship_lasers_query: Query<(Entity, &ShipLaser, &HitBox, &Transform)>,
-    enemies_query: Query<(Entity, &Enemy, &HitBox, &Transform)>,
+pub fn check_laser_enemy(
+    mut collision_laser_enemy_events: ResMut<Events<CollisionLaserEnemyEvent>>,
+    query_laser: Query<(Entity, &Laser, &HitBox, &Transform)>,
+    query_enemy: Query<(Entity, &Enemy, &HitBox, &Transform)>,
+    query_ship: Query<&Ship>,
 ) {
-    for (ship_laser_entity, _ship_laser, HitBox(ship_laser_hit_box), ship_laser_transform) in
-        ship_lasers_query.iter()
-    {
-        for (enemy_entity, _enemy, HitBox(enemy_hit_box), enemy_transform) in enemies_query.iter() {
-            if bevy::sprite::collide_aabb::collide(
-                ship_laser_transform.translation,
-                *ship_laser_hit_box,
-                enemy_transform.translation,
-                *enemy_hit_box,
-            )
-            .is_some()
+    for (laser_entity, laser, HitBox(laser_hit_box), laser_transform) in query_laser.iter() {
+        if query_ship.get(laser.source).is_ok() {
+            for (enemy_entity, _enemy, HitBox(enemy_hit_box), enemy_transform) in query_enemy.iter()
             {
-                collision_enemy_laser_events.send(CollisionEnemyShipLaserEvent {
-                    enemy_entity,
-                    ship_laser_entity,
-                });
+                if bevy::sprite::collide_aabb::collide(
+                    laser_transform.translation,
+                    *laser_hit_box,
+                    enemy_transform.translation,
+                    *enemy_hit_box,
+                )
+                .is_some()
+                {
+                    collision_laser_enemy_events.send(CollisionLaserEnemyEvent {
+                        laser_entity,
+                        enemy_entity,
+                    });
+                }
             }
         }
     }
 }
 
-pub fn handle_collision_enemy_ship_laser(
+pub fn handle_laser_enemy(
     mut commands: Commands,
-    collision_enemy_laser_events: Res<Events<CollisionEnemyShipLaserEvent>>,
+    collision_laser_enemy_events: Res<Events<CollisionLaserEnemyEvent>>,
     mut spawn_explosion_events: ResMut<Events<SpawnExplosionEvent>>,
     mut event_readers: ResMut<EventReaders>,
     query_enemy: Query<&Transform>,
 ) {
     for evt in event_readers
-        .collision_enemy_ship_laser
-        .iter(&collision_enemy_laser_events)
+        .collision_laser_enemy
+        .iter(&collision_laser_enemy_events)
     {
         let enemy_transform = query_enemy
             .get(evt.enemy_entity)
@@ -52,6 +54,6 @@ pub fn handle_collision_enemy_ship_laser(
         });
 
         commands.despawn(evt.enemy_entity);
-        commands.despawn(evt.ship_laser_entity);
+        commands.despawn(evt.laser_entity);
     }
 }

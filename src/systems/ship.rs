@@ -1,6 +1,6 @@
 use crate::{
     components::{HitBox, Ship, ShipAnimationState, Velocity},
-    events::SpawnShipLaserEvent,
+    events::SpawnLaserEvent,
 };
 use bevy::{
     input::{keyboard::KeyCode, Input},
@@ -96,7 +96,8 @@ pub fn animation_state_transition(
 
 pub fn fire_laser(
     time: Res<Time>,
-    mut spawn_ship_laser_events: ResMut<Events<SpawnShipLaserEvent>>,
+    mut spawn_laser_events: ResMut<Events<SpawnLaserEvent>>,
+    entity: Entity,
     transform: &Transform,
     HitBox(hit_box): &HitBox,
     mut ship: Mut<Ship>,
@@ -105,6 +106,9 @@ pub fn fire_laser(
     if ship.laser_cooldown_timer.finished {
         ship.laser_cooldown_timer.reset();
         let laser_translation = transform.translation + hit_box.x() * Vec3::unit_y();
-        spawn_ship_laser_events.send(SpawnShipLaserEvent { laser_translation })
+        spawn_laser_events.send(SpawnLaserEvent {
+            laser_translation,
+            laser_source: entity,
+        })
     }
 }
