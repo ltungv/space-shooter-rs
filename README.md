@@ -13,13 +13,13 @@ Still thinking about the core mechanics and other interesting twists that can be
 - [x] player ship controls
 - [x] player ship shoots laser automatically
 - [x] enemies are randomly spawned
+- [x] enemies fire lasers
 - [x] collision enemies-laser
+- [x] collision player-laser
 - [ ] player ship health and damage
 - [ ] enemies health and damage
-- [ ] enemies fire lasers (towards player's ship)
 - [ ] enemies moving patterns
 - [ ] collision player-enemies
-- [ ] collision player-laser
 - [ ] collision laser-laser
 - [ ] animations (for everything that can be animated)
 - [ ] upgradables/consumables (damage multiplier, laser's patterns, rate of fire, movement speed, and etc.)
