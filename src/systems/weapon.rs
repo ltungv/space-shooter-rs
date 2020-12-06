@@ -14,9 +14,9 @@ pub fn fire_laser(
         spawn_laser_events.send(SpawnLaserEvent {
             laser_translation: weapon_global_transform.translation,
             laser_source: weapon_parent.0,
-            laser_velocity: weapon.laser_velocity.clone(),
-            laser_hit_box: weapon.laser_hit_box.clone(),
-            laser_time_to_live: weapon.laser_time_to_live.clone(),
+            laser_velocity: weapon.laser_velocity,
+            laser_hit_box: weapon.laser_hit_box,
+            laser_time_to_live_duration: weapon.laser_time_to_live_duration,
             laser_initial_sprite_idx: weapon.laser_initial_sprite_idx,
         })
     }

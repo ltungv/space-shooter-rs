@@ -1,7 +1,6 @@
 use crate::{
     components::{
-        Animation, ConstrainedToArena, HitBox, Ship, ShipAnimationState, TimeToLive, Velocity,
-        Weapon,
+        Animation, ConstrainedToArena, HitBox, Ship, ShipAnimationState, Velocity, Weapon,
     },
     constant::{
         ANIMATION_INTERVAL, SHIP_INITIAL_MOVE_SPEED, SHIP_LASER_COOLDOWN_DURATION,
@@ -61,10 +60,7 @@ pub fn initialize_ship(mut commands: Commands, texture_atlas_handles: Res<Textur
                         SHIP_LASER_SPRITE_WIDTH,
                         SHIP_LASER_SPRITE_HEIGHT,
                     )),
-                    laser_time_to_live: TimeToLive(Timer::new(
-                        SHIP_LASER_TIME_TO_LIVE_DURATION,
-                        false,
-                    )),
+                    laser_time_to_live_duration: SHIP_LASER_TIME_TO_LIVE_DURATION,
                     laser_initial_sprite_idx: 1,
                 },
                 transform: Transform {

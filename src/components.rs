@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::time::Duration;
 
 /// Different states of the  when moving left/right
 #[derive(Debug, PartialEq)]
@@ -19,7 +20,7 @@ pub struct Ship {
 }
 
 /// The type of enemy
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EnemyVariant {
     Small,
     Medium,
@@ -49,7 +50,7 @@ pub struct Weapon {
     pub cooldown_timer: Timer,
     pub laser_velocity: Velocity,
     pub laser_hit_box: HitBox,
-    pub laser_time_to_live: TimeToLive,
+    pub laser_time_to_live_duration: Duration,
     pub laser_initial_sprite_idx: u32,
 }
 
@@ -68,11 +69,11 @@ pub struct Animation {
 #[derive(Debug)]
 pub struct ConstrainedToArena;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Velocity(pub Vec2);
 
 /// Component that determines the smallest possible box that includes rendered the entity.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct HitBox(pub Vec2);
 
 #[derive(Debug, Clone)]

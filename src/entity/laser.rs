@@ -36,9 +36,9 @@ pub fn spawn_laser(
                 laser: Laser {
                     source: evt.laser_source,
                 },
-                time_to_live: evt.laser_time_to_live.clone(),
-                hit_box: evt.laser_hit_box.clone(),
-                velocity: evt.laser_velocity.clone(),
+                time_to_live: TimeToLive(Timer::new(evt.laser_time_to_live_duration, false)),
+                hit_box: evt.laser_hit_box,
+                velocity: evt.laser_velocity,
                 animation: Animation {
                     idx_delta: 2,
                     sprite_count: 4,

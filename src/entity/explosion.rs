@@ -31,7 +31,7 @@ pub fn spawn_explosion(
             })
             .with_bundle(ExplosionComponents {
                 explosion: Explosion,
-                time_to_live: evt.explosion_time_to_live.clone(),
+                time_to_live: TimeToLive(Timer::new(evt.explosion_time_to_live_duration, false)),
                 animation: Animation {
                     idx_delta: 1,
                     sprite_count: 2,

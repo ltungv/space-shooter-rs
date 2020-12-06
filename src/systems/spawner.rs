@@ -25,8 +25,7 @@ pub fn spawn_enemy_trigger(
             .weights
             .choose_weighted(&mut rng, |item| item.1)
             .expect("Could not choose spawnable")
-            .0
-            .clone();
+            .0;
 
         let (enemy_width, enemy_height) = match enemy_variant {
             EnemyVariant::Small => (ENEMY_SMALL_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT),

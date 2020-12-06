@@ -1,15 +1,17 @@
 use crate::{
-    components::{Enemy, HitBox, Laser, Ship, TimeToLive},
+    components::{Enemy, HitBox, Laser, Ship},
     constant::ANIMATION_INTERVAL,
     events::{CollisionLaserEnemyEvent, CollisionLaserShipEvent, SpawnExplosionEvent},
     resource::EventReaders,
 };
 use bevy::prelude::*;
 
-pub fn check_laser_ship(
+pub fn check_laser(
     mut collision_laser_ship_events: ResMut<Events<CollisionLaserShipEvent>>,
+    mut collision_laser_enemy_events: ResMut<Events<CollisionLaserEnemyEvent>>,
     query_laser: Query<(Entity, &Laser, &HitBox, &Transform)>,
     query_ship: Query<(Entity, &Ship, &HitBox, &Transform)>,
+    query_enemy: Query<(Entity, &Enemy, &HitBox, &Transform)>,
 ) {
     for (laser_entity, laser, HitBox(laser_hit_box), laser_transform) in query_laser.iter() {
         if query_ship.get(laser.source).is_err() {
@@ -29,15 +31,7 @@ pub fn check_laser_ship(
                 }
             }
         }
-    }
-}
 
-pub fn check_laser_enemy(
-    mut collision_laser_enemy_events: ResMut<Events<CollisionLaserEnemyEvent>>,
-    query_laser: Query<(Entity, &Laser, &HitBox, &Transform)>,
-    query_enemy: Query<(Entity, &Enemy, &HitBox, &Transform)>,
-) {
-    for (laser_entity, laser, HitBox(laser_hit_box), laser_transform) in query_laser.iter() {
         if query_enemy.get(laser.source).is_err() {
             for (enemy_entity, _enemy, HitBox(enemy_hit_box), enemy_transform) in query_enemy.iter()
             {
@@ -75,7 +69,7 @@ pub fn handle_laser_ship(
             .expect("Could not get ship transform component");
         spawn_explosion_events.send(SpawnExplosionEvent {
             explosion_translation: ship_transform.translation,
-            explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
+            explosion_time_to_live_duration: ANIMATION_INTERVAL * 5,
         });
 
         commands.despawn_recursive(evt.ship_entity);
@@ -99,7 +93,7 @@ pub fn handle_laser_enemy(
             .expect("Could not get enemy transform component");
         spawn_explosion_events.send(SpawnExplosionEvent {
             explosion_translation: enemy_transform.translation,
-            explosion_time_to_live: TimeToLive(Timer::new(ANIMATION_INTERVAL * 5, false)),
+            explosion_time_to_live_duration: ANIMATION_INTERVAL * 5,
         });
 
         commands.despawn_recursive(evt.enemy_entity);
