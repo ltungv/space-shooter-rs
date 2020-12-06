@@ -1,6 +1,7 @@
 use crate::{
     components::{Animation, Enemy, EnemyVariant, HitBox, Velocity},
     constant::{
+        ENEMY_LASER_COOLDOWN_DURATION,
         ANIMATION_INTERVAL, ENEMY_BIG_SPRITE_HEIGHT, ENEMY_BIG_SPRITE_WIDTH,
         ENEMY_INITIAL_VELOCITY, ENEMY_MEDIUM_SPRITE_HEIGHT, ENEMY_MEDIUM_SPRITE_WIDTH,
         ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
@@ -52,6 +53,7 @@ pub fn spawn_enemy(
             .with_bundle(EnemyComponents {
                 enemy: Enemy {
                     variant: evt.enemy_variant.clone(),
+                    laser_cooldown_timer: Timer::new(ENEMY_LASER_COOLDOWN_DURATION, false),
                 },
                 hit_box: HitBox(hit_box_vec2),
                 velocity: Velocity(Vec2::new(

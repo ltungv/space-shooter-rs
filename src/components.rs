@@ -31,6 +31,7 @@ pub enum EnemyVariant {
 #[derive(Debug)]
 pub struct Enemy {
     pub variant: EnemyVariant,
+    pub laser_cooldown_timer: Timer,
 }
 
 /// Component determines the spawn rate and spawn probability of entities

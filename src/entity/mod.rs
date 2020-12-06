@@ -1,13 +1,13 @@
 mod enemy;
 mod enemy_spawner;
 mod ship;
-mod ship_laser;
+mod laser;
 mod explosion;
 
 pub use enemy::*;
 pub use enemy_spawner::*;
 pub use ship::*;
-pub use ship_laser::*;
+pub use laser::*;
 pub use explosion::*;
 
 use crate::constant::ARENA_SCALE;

@@ -4,12 +4,16 @@ use crate::{
         ENEMY_MEDIUM_SPRITE_WIDTH, ENEMY_SMALL_SPRITE_HEIGHT, ENEMY_SMALL_SPRITE_WIDTH,
         EXPLOSION_SPRITE_HEIGHT, EXPLOSION_SPRITE_WIDTH, SHIP_SPRITE_HEIGHT, SHIP_SPRITE_WIDTH,
     },
-    events::{CollisionLaserEnemyEvent, SpawnEnemyEvent, SpawnExplosionEvent, SpawnLaserEvent},
+    events::{
+        CollisionLaserEnemyEvent, CollisionLaserShipEvent, SpawnEnemyEvent, SpawnExplosionEvent,
+        SpawnLaserEvent,
+    },
 };
 use bevy::prelude::*;
 
 #[derive(Default)]
 pub struct EventReaders {
+    pub collision_laser_ship: EventReader<CollisionLaserShipEvent>,
     pub collision_laser_enemy: EventReader<CollisionLaserEnemyEvent>,
     pub spawn_enemy: EventReader<SpawnEnemyEvent>,
     pub spawn_explosion: EventReader<SpawnExplosionEvent>,
