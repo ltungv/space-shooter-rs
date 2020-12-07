@@ -18,7 +18,6 @@ impl Plugin for Game {
             .add_startup_system(entity::initialize_camera.system())
             .add_startup_system(entity::initialize_ship.system())
             .add_startup_system(entity::initialize_enemy_spawner.system())
-            .add_system(bevy::input::system::exit_on_esc_system.system())
             .add_system(entity::spawn_enemy.system())
             .add_system(entity::spawn_explosion.system())
             .add_system(entity::spawn_laser.system())

@@ -4,7 +4,7 @@ use crate::{
     events::{CollisionLaserEnemyEvent, CollisionLaserShipEvent, SpawnExplosionEvent},
     resource::EventReaders,
 };
-use bevy::prelude::*;
+use bevy::{app::AppExit, prelude::*};
 
 pub fn check_laser(
     mut collision_laser_ship_events: ResMut<Events<CollisionLaserShipEvent>>,
@@ -56,6 +56,7 @@ pub fn check_laser(
 pub fn handle_laser_ship(
     mut commands: Commands,
     collision_laser_ship_events: Res<Events<CollisionLaserShipEvent>>,
+    mut app_exit_events: ResMut<Events<AppExit>>,
     mut spawn_explosion_events: ResMut<Events<SpawnExplosionEvent>>,
     mut event_readers: ResMut<EventReaders>,
     query_ship_transform: Query<&Transform>,
@@ -74,6 +75,7 @@ pub fn handle_laser_ship(
 
         commands.despawn_recursive(evt.ship_entity);
         commands.despawn(evt.laser_entity);
+        app_exit_events.send(AppExit);
     }
 }
 

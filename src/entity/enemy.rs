@@ -66,31 +66,38 @@ pub fn spawn_enemy(
                     sprite_count: 2,
                     timer: Timer::new(ANIMATION_INTERVAL, true),
                 },
-            })
-            .with_children(|parent| {
-                let mut weapon_cooldown_timer = Timer::new(ENEMY_LASER_COOLDOWN_DURATION, false);
-                weapon_cooldown_timer.tick(ENEMY_LASER_COOLDOWN_DURATION.as_secs_f32());
-
-                parent.spawn(WeaponComponents {
-                    weapon: Weapon {
-                        cooldown_timer: weapon_cooldown_timer,
-                        laser_velocity: Velocity(Vec2::new(
-                            ENEMY_LASER_INITIAL_VELOCITY.0,
-                            ENEMY_LASER_INITIAL_VELOCITY.1,
-                        )),
-                        laser_hit_box: HitBox(Vec2::new(
-                            ENEMY_LASER_SPRITE_WIDTH,
-                            ENEMY_LASER_SPRITE_HEIGHT,
-                        )),
-                        laser_time_to_live_duration: ENEMY_LASER_TIME_TO_LIVE_DURATION,
-                        laser_initial_sprite_idx: 0,
-                    },
-                    transform: Transform {
-                        translation: -hit_box_vec2.y() * Vec3::unit_y(),
-                        ..Default::default()
-                    },
-                    global_transform: Default::default(),
-                });
             });
+
+        match evt.enemy_variant {
+            EnemyVariant::Medium | EnemyVariant::Big => {
+                commands.with_children(|parent| {
+                    let mut weapon_cooldown_timer =
+                        Timer::new(ENEMY_LASER_COOLDOWN_DURATION, false);
+                    weapon_cooldown_timer.tick(ENEMY_LASER_COOLDOWN_DURATION.as_secs_f32());
+
+                    parent.spawn(WeaponComponents {
+                        weapon: Weapon {
+                            cooldown_timer: weapon_cooldown_timer,
+                            laser_velocity: Velocity(Vec2::new(
+                                ENEMY_LASER_INITIAL_VELOCITY.0,
+                                ENEMY_LASER_INITIAL_VELOCITY.1,
+                            )),
+                            laser_hit_box: HitBox(Vec2::new(
+                                ENEMY_LASER_SPRITE_WIDTH,
+                                ENEMY_LASER_SPRITE_HEIGHT,
+                            )),
+                            laser_time_to_live_duration: ENEMY_LASER_TIME_TO_LIVE_DURATION,
+                            laser_initial_sprite_idx: 0,
+                        },
+                        transform: Transform {
+                            translation: -hit_box_vec2.y() * Vec3::unit_y(),
+                            ..Default::default()
+                        },
+                        global_transform: Default::default(),
+                    });
+                });
+            }
+            _ => {}
+        }
     }
 }
